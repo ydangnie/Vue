@@ -10,7 +10,6 @@
       </nav>
 
       <div class="row">
-        <!-- Order Summary -->
         <div class="col-lg-8">
           <div class="card mb-4">
             <div class="card-header">
@@ -41,7 +40,6 @@
             </div>
           </div>
 
-          <!-- Customer Information -->
           <div class="card mb-4">
             <div class="card-header">
               <h4 class="mb-0">Thông tin khách hàng</h4>
@@ -55,7 +53,7 @@
                   </div>
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Email *</label>
-                    <input v-model="orderInfo.customerEmail" type="email" class="form-control" required>
+                    <input v-model="orderInfo.customerEmail" type="email" class="form-control" required readonly>
                   </div>
                 </div>
                 <div class="mb-3">
@@ -75,7 +73,6 @@
           </div>
         </div>
 
-        <!-- Order Summary Sidebar -->
         <div class="col-lg-4">
           <div class="card sticky-top">
             <div class="card-header">
@@ -176,11 +173,19 @@ export default {
       return this.cartTotal - this.promoDiscount;
     }
   },
+  mounted() {
+    // FIX: Tự động điền thông tin người dùng đã đăng nhập
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+        this.orderInfo.customerName = user.username;
+        this.orderInfo.customerEmail = user.email;
+    }
+  },
   methods: {
+    ...mapActions(['clearCart']),
     applyPromoCode() {
       if (!this.orderInfo.promoCode) return;
 
-      // Simple promo code logic - you can expand this
       const promoCodes = {
         'SAVE10': { discount: 10, valid: true },
         'WELCOME20': { discount: 20, valid: true },
@@ -213,7 +218,7 @@ export default {
 
       try {
         const orderData = {
-          id: Date.now(), // Simple ID generation
+          // Không cần gửi ID, json-server sẽ tự tạo
           customer: {
             name: this.orderInfo.customerName,
             email: this.orderInfo.customerEmail,
@@ -231,18 +236,17 @@ export default {
           createdAt: new Date().toISOString()
         }
 
-        // Save order to database
-        await axios.post('/orders', orderData)
+        // FIX: Lưu lại response để lấy ID đúng
+        const response = await axios.post('/orders', orderData)
+        const savedOrder = response.data; // Đây là đơn hàng đã được lưu với ID chính xác
 
-        // Clear cart after successful order
         this.clearCart()
-
         this.$toast.success('Đặt hàng thành công!')
 
-        // Redirect to order confirmation
+        // FIX: Chuyển hướng với ID đúng từ server
         this.$router.push({
           name: 'DonHangThanhCong',
-          params: { orderId: orderData.id }
+          params: { orderId: savedOrder.id }
         })
 
       } catch (error) {
@@ -251,8 +255,7 @@ export default {
       } finally {
         this.placingOrder = false
       }
-    },
-    ...mapActions(['clearCart'])
+    }
   }
 }
 </script>

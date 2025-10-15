@@ -1,13 +1,12 @@
-
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
-  async mounted() {
-    // Load cart from API on component mount
-    await this.$store.dispatch('loadCart')
-  },
   name: 'GioHang',
+  async mounted() {
+    // Tải giỏ hàng từ store
+    await this.$store.dispatch('loadCart');
+  },
   computed: {
     ...mapState(['cart']),
     ...mapGetters(['cartTotal', 'cartItemCount'])
@@ -15,29 +14,31 @@ export default {
   methods: {
     ...mapActions(['removeFromCart', 'updateCartItemQuantity', 'clearCart']),
     increaseQuantity(productId) {
-      const item = this.cart.find(item => item.id === productId)
+      const item = this.cart.find(item => item.id === productId);
       if (item && item.quantity < item.stock) {
-        this.updateCartItemQuantity({ productId, quantity: item.quantity + 1 })
+        this.updateCartItemQuantity({ productId, quantity: item.quantity + 1 });
       } else {
-        alert('Không thể thêm nhiều hơn số lượng có sẵn')
+        this.$toast.warning('Số lượng đã đạt giới hạn tồn kho!');
       }
     },
     decreaseQuantity(productId) {
-      const item = this.cart.find(item => item.id === productId)
+      const item = this.cart.find(item => item.id === productId);
       if (item && item.quantity > 1) {
-        this.updateCartItemQuantity({ productId, quantity: item.quantity - 1 })
+        this.updateCartItemQuantity({ productId, quantity: item.quantity - 1 });
       }
     },
     updateQuantity(productId, newQuantity) {
-      const quantity = parseInt(newQuantity)
-      const item = this.cart.find(item => item.id === productId)
-      if (quantity > 0 && quantity <= (item ? item.stock : 99)) {
-        this.updateCartItemQuantity({ productId, quantity })
-      } else if (quantity <= 0) {
-        // If quantity is 0 or negative, remove the item
-        this.removeFromCart(productId)
+      const quantity = parseInt(newQuantity);
+      const item = this.cart.find(item => item.id === productId);
+      if (!item) return;
+
+      if (quantity > 0 && quantity <= item.stock) {
+        this.updateCartItemQuantity({ productId, quantity });
+      } else if (quantity > item.stock) {
+          this.updateCartItemQuantity({ productId, quantity: item.stock });
+          this.$toast.error('Không thể vượt quá số lượng tồn kho!');
       } else {
-        alert('Không thể thêm nhiều hơn số lượng có sẵn')
+        this.removeFromCart(productId);
       }
     },
   }
@@ -49,8 +50,6 @@ export default {
     <div class="container">
       <h1 class="mb-4">Giỏ hàng của bạn</h1>
 
-
-      <!-- Cart Items -->
       <div v-if="cart.length > 0" class="cart-items">
         <div v-for="item in cart" :key="item.id" class="cart-item card mb-3">
           <div class="card-body">
@@ -72,7 +71,7 @@ export default {
               <div class="col-md-2">
                 <div class="quantity-controls">
                   <button @click="decreaseQuantity(item.id)" class="btn btn-outline-secondary btn-sm">-</button>
-                  <input type="number" :value="item.quantity" @input="updateQuantity(item.id, $event.target.value)" class="form-control form-control-sm quantity-input mx-2" min="1" max="99">
+                  <input type="number" :value="item.quantity" @input="updateQuantity(item.id, $event.target.value)" class="form-control form-control-sm quantity-input mx-2" min="1" :max="item.stock">
                   <button @click="increaseQuantity(item.id)" class="btn btn-outline-secondary btn-sm">+</button>
                 </div>
               </div>
@@ -88,7 +87,6 @@ export default {
           </div>
         </div>
 
-        <!-- Cart Summary -->
         <div class="cart-summary card mt-4">
           <div class="card-body">
             <div class="row">
@@ -106,7 +104,6 @@ export default {
         </div>
       </div>
 
-      <!-- Empty Cart -->
       <div v-else class="empty-cart text-center py-5">
         <i class="fas fa-shopping-cart fa-5x text-muted mb-4"></i>
         <h3>Giỏ hàng trống</h3>

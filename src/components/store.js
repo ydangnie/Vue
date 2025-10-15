@@ -1,24 +1,23 @@
 import { createStore } from 'vuex'
 import axios from '../../axios.js'
 
-// Helper functions for API
-const loadCartFromAPI = async() => {
+// Hàm trợ giúp để tải giỏ hàng từ localStorage
+const loadCartFromLocalStorage = () => {
     try {
-        const response = await axios.get('/cart');
-        return response.data || [];
+        const cart = localStorage.getItem('cart');
+        return cart ? JSON.parse(cart) : [];
     } catch (error) {
-        console.error('Error loading cart from API:', error);
+        console.error('Lỗi khi tải giỏ hàng từ LocalStorage:', error);
         return [];
     }
 };
 
-const saveCartToAPI = async(cart) => {
+// Hàm trợ giúp để lưu giỏ hàng vào localStorage
+const saveCartToLocalStorage = (cart) => {
     try {
-        // Temporarily disabled API save due to 404 error
-        // await axios.put('/cart', cart);
-        console.log('Cart saved to memory:', cart);
+        localStorage.setItem('cart', JSON.stringify(cart));
     } catch (error) {
-        console.error('Error saving cart to API:', error);
+        console.error('Lỗi khi lưu giỏ hàng vào LocalStorage:', error);
     }
 };
 
@@ -27,7 +26,7 @@ const store = createStore({
     state() {
         return {
             count: 0,
-            cart: [],
+            cart: loadCartFromLocalStorage(), // Tải giỏ hàng khi khởi tạo
             user: null
         }
     },
@@ -41,7 +40,7 @@ const store = createStore({
         },
         // Cart mutations
         ADD_TO_CART(state, product) {
-            // Check if product has enough stock
+            // Kiểm tra tồn kho
             if (product.stock <= 0) {
                 throw new Error('Sản phẩm đã hết hàng');
             }
@@ -55,25 +54,26 @@ const store = createStore({
             } else {
                 state.cart.push({...product, quantity: 1 })
             }
-            saveCartToAPI(state.cart)
+            saveCartToLocalStorage(state.cart); // Lưu vào localStorage
         },
         REMOVE_FROM_CART(state, productId) {
             state.cart = state.cart.filter(item => item.id !== productId)
-            saveCartToAPI(state.cart)
+            saveCartToLocalStorage(state.cart); // Lưu vào localStorage
         },
         UPDATE_CART_ITEM_QUANTITY(state, { productId, quantity }) {
             const item = state.cart.find(item => item.id === productId)
             if (item) {
                 item.quantity = quantity
             }
-            saveCartToAPI(state.cart)
+            saveCartToLocalStorage(state.cart); // Lưu vào localStorage
         },
         CLEAR_CART(state) {
             state.cart = []
-            saveCartToAPI(state.cart)
+            saveCartToLocalStorage(state.cart); // Lưu vào localStorage
         },
         SET_CART(state, cart) {
-            state.cart = cart
+            state.cart = cart;
+            saveCartToLocalStorage(state.cart);
         },
         // User mutations
         SET_USER(state, user) {
@@ -92,7 +92,11 @@ const store = createStore({
             }, 1000)
         },
         // Cart actions
-        async addToCart({ commit }, product) {
+        async addToCart({ commit, state }, product) {
+            const itemInCart = state.cart.find(item => item.id === product.id);
+            if (itemInCart && itemInCart.quantity >= product.stock) {
+                throw new Error('Số lượng sản phẩm trong giỏ hàng đã đạt tối đa.');
+            }
             commit('ADD_TO_CART', product)
         },
         async removeFromCart({ commit }, productId) {
@@ -104,9 +108,9 @@ const store = createStore({
         async clearCart({ commit }) {
             commit('CLEAR_CART')
         },
-        async loadCart({ commit }) {
-            const cart = await loadCartFromAPI()
-            commit('SET_CART', cart)
+        loadCart({ commit }) {
+            const cart = loadCartFromLocalStorage();
+            commit('SET_CART', cart);
         },
         // User actions
         setUser({ commit }, user) {

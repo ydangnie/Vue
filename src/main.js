@@ -1,6 +1,6 @@
 import './assets/main.css'
 import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
+// import 'bootstrap-vue/dist/bootstrap-vue.css' // Xóa hoặc ghi chú dòng này, xem giải thích bên dưới
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { createApp } from 'vue'
@@ -18,6 +18,7 @@ app.use(router);
 // Global toast method
 app.config.globalProperties.$toast = {
     show(type, title, message, duration = 3000) {
+        // logic toast giữ nguyên
         if (app._instance && app._instance.proxy && app._instance.proxy.showToast) {
             app._instance.proxy.showToast(type, title, message, duration);
         }
@@ -39,3 +40,5 @@ app.config.globalProperties.$toast = {
 console.log('Mounting app...');
 app.mount('#app');
 console.log('App mounted successfully!');
+
+// Xóa dấu } thừa ở đây

@@ -114,7 +114,6 @@ export default {
       axios.get(`/products/${id}`)
         .then(response => {
           this.sanPham = response.data;
-          // Set the first image as selected, or fallback to single image or placeholder
           if (this.sanPham.images && this.sanPham.images.length > 0) {
             this.selectedImage = this.sanPham.images[0];
           } else if (this.sanPham.image) {
@@ -132,21 +131,26 @@ export default {
 
       this.addingToCart = true;
       try {
-        // Add stock property for cart validation
         const productWithStock = {
           ...this.sanPham,
-          stock: this.sanPham.quantity
+          stock: this.sanPham.quantity // Sử dụng 'quantity' làm 'stock'
         };
         await this.addToCartAction(productWithStock);
-        this.$toast.success('Đã thêm sản phẩm vào giỏ hàng!');
+        this.$toast.success('Thành công!', 'Đã thêm sản phẩm vào giỏ hàng.');
       } catch (error) {
         console.error('Lỗi khi thêm vào giỏ hàng:', error);
-        this.$toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!');
+        this.$toast.error('Thêm thất bại!', error.message || 'Không đủ hàng tồn kho.');
       } finally {
         this.addingToCart = false;
       }
     }
   },
+   watch: {
+    // Thêm watch để tải lại dữ liệu khi route thay đổi (khi xem sản phẩm liên quan)
+    '$route.params.id'() {
+      this.layChiTietSanPham();
+    }
+  }
 };
 </script>
 

@@ -391,6 +391,88 @@
       "notes": "cẩn trhaanj",
       "status": "pending",
       "createdAt": "2025-10-15T02:37:28.733Z"
+    },
+    {
+      "id": 1760499907172,
+      "customer": {
+        "name": "Dang Nie",
+        "email": "nieydpk04105@gmail.com",
+        "phone": "086898273",
+        "address": "Buôn Ma thuột"
+      },
+      "items": [
+        {
+          "id": "2",
+          "title": "Smart LED Lamp",
+          "price": 29.5,
+          "category": "Home",
+          "images": [
+            "https://picsum.photos/seed/lamp/400/400",
+            "https://picsum.photos/seed/smartlight/400/400"
+          ],
+          "description": "Warm-to-cool light, app & voice control. Energy efficient LED with smart home integration.",
+          "quantity": 1,
+          "discount": 10,
+          "featured": true,
+          "stock": 5
+        },
+        {
+          "id": "1759891048307",
+          "title": "Áo",
+          "price": 50,
+          "category": "Sports",
+          "description": "diksdnfjusndoufsd",
+          "quantity": 1,
+          "discount": 1,
+          "images": [
+            "https://picsum.photos/seed/placeholder/400/400"
+          ],
+          "featured": false,
+          "stock": 9
+        }
+      ],
+      "total": 76.05,
+      "originalTotal": 76.05,
+      "promoCode": null,
+      "promoDiscount": 0,
+      "paymentMethod": "cod",
+      "notes": "Cẩn thận",
+      "status": "pending",
+      "createdAt": "2025-10-15T03:45:07.172Z"
+    },
+    {
+      "id": "0310",
+      "customer": {
+        "name": "dangnie6",
+        "email": "ffo05957@toaik.com",
+        "phone": "0123456789",
+        "address": "Buôn Ma Thuột"
+      },
+      "items": [
+        {
+          "id": "4",
+          "title": "Bluetooth Speaker",
+          "price": 39.99,
+          "category": "Electronics",
+          "images": [
+            "https://picsum.photos/seed/speaker/400/400",
+            "https://picsum.photos/seed/bluetooth/400/400"
+          ],
+          "description": "Portable, waterproof, deep bass. High-quality audio with waterproof design for outdoor use.",
+          "quantity": 1,
+          "discount": 0,
+          "featured": true,
+          "stock": 15
+        }
+      ],
+      "total": 39.99,
+      "originalTotal": 39.99,
+      "promoCode": null,
+      "promoDiscount": 0,
+      "paymentMethod": "cod",
+      "notes": "",
+      "status": "pending",
+      "createdAt": "2025-10-15T03:49:38.839Z"
     }
   ],
   "cart": [
