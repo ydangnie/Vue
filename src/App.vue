@@ -1,5 +1,6 @@
 <script>
 import Toast from './components/lab4/Toast.vue';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'App',
@@ -13,6 +14,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['cartItemCount']),
     isLoggedIn() {
       return !!this.currentUser;
     },
@@ -24,6 +26,8 @@ export default {
     console.log('App component mounted!');
     this.checkAuthStatus();
     window.addEventListener('storage', this.checkAuthStatus);
+    // Load cart on app mount
+    this.$store.dispatch('loadCart');
   },
   beforeUnmount() {
     window.removeEventListener('storage', this.checkAuthStatus);
@@ -65,8 +69,11 @@ export default {
 </script>
 
 <template>
+  
     <div id="app">
+      
         <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+          
             <div class="container">
                 <router-link to="/" class="navbar-brand fw-bold">🛍️ ShopVue</router-link>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -76,10 +83,17 @@ export default {
                     <div class="navbar-nav me-auto">
                         <router-link to="/" class="nav-link">Trang chủ</router-link>
                         <router-link to="/san-pham" class="nav-link">Sản phẩm</router-link>
+                        <router-link v-if="isLoggedIn" to="/gio-hang" class="nav-link">
+                            <i class="fas fa-shopping-cart me-1"></i>Giỏ hàng
+                            <span v-if="cartItemCount > 0" class="badge bg-danger ms-1">{{ cartItemCount }}</span>
+                        </router-link>
                         <router-link v-if="isAdmin" to="/admin/san-pham" class="nav-link">Quản lý sản phẩm</router-link>
                         <router-link v-if="isAdmin" to="/admin/category" class="nav-link">Quản lý danh mục</router-link>
                         <router-link v-if="isAdmin" to="/admin/users" class="nav-link">Quản lý người dùng</router-link>
+                        <router-link v-if="isAdmin" to="/admin/orders" class="nav-link">Quản lý đơn hàng</router-link>
+                        <router-link v-if="isAdmin" to="/admin/reports" class="nav-link">Báo cáo thống kê</router-link>
                         <router-link v-if="isLoggedIn" to="/cap-nhat-user" class="nav-link">Hồ sơ</router-link>
+                        <router-link v-if="isLoggedIn" to="/lich-su-don-hang" class="nav-link">Lịch sử đơn hàng</router-link>
                     </div>
                     <div class="navbar-nav">
                         <div v-if="!isLoggedIn" class="nav-item">
@@ -123,9 +137,13 @@ export default {
             </div>
         </nav>
         <div class="container">
-            <router-view></router-view>
+            <router-view>
+           
+            </router-view>
         </div>
-
+<div>
+  
+</div>
         <!-- Global Toast Notifications -->
         <Toast
           v-for="(toast, index) in toasts"

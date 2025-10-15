@@ -44,7 +44,11 @@
 
             <div class="product-meta mb-4">
               <p><strong>Danh mục:</strong> <span class="badge bg-primary">{{ sanPham.category }}</span></p>
-              <p><strong>Số lượng còn:</strong> {{ sanPham.quantity }}</p>
+              <p><strong>Số lượng còn:</strong>
+                <span :class="sanPham.stock > 0 ? 'text-success' : 'text-danger'">
+                  {{ sanPham.stock > 0 ? sanPham.stock + ' sản phẩm' : 'Hết hàng' }}
+                </span>
+              </p>
               <p v-if="sanPham.featured" class="text-warning"><i class="fas fa-star"></i> Sản phẩm nổi bật</p>
             </div>
 
@@ -54,8 +58,9 @@
             </div>
 
             <div class="action-buttons">
-              <button class="btn btn-primary btn-lg me-3">
-                <i class="fas fa-cart-plus"></i> Thêm vào giỏ hàng
+              <button @click="addToCart" class="btn btn-primary btn-lg me-3" :disabled="addingToCart || sanPham.stock <= 0">
+                <span v-if="addingToCart" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                <i class="fas fa-cart-plus"></i> {{ addingToCart ? 'Đang thêm...' : (sanPham.stock <= 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng') }}
               </button>
               <button class="btn btn-outline-secondary btn-lg">
                 <i class="fas fa-heart"></i> Yêu thích
@@ -64,6 +69,12 @@
           </div>
         </div>
       </div>
+
+      <!-- Related Products -->
+      <SanPhamLienQuan
+        :current-product-id="sanPham.id"
+        :category="sanPham.category"
+      />
 
       <div class="text-center mt-5">
         <router-link to="/san-pham" class="btn btn-outline-primary">
@@ -75,23 +86,32 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from '../../../axios.js';
+import { mapActions } from 'vuex';
+import SanPhamLienQuan from './SanPhamLienQuan.vue';
 
 export default {
   name: 'ChiTietSanPham',
+  components: {
+    SanPhamLienQuan
+  },
   data() {
     return {
       sanPham: {},
       selectedImage: '',
+      addingToCart: false
     };
   },
   mounted() {
     this.layChiTietSanPham();
   },
   methods: {
+    ...mapActions({
+      addToCartAction: 'addToCart'
+    }),
     layChiTietSanPham() {
       const id = this.$route.params.id;
-      axios.get(`http://localhost:3001/products/${id}`)
+      axios.get(`/products/${id}`)
         .then(response => {
           this.sanPham = response.data;
           // Set the first image as selected, or fallback to single image or placeholder
@@ -107,6 +127,25 @@ export default {
           console.error('Lỗi:', error);
         });
     },
+    async addToCart() {
+      if (this.addingToCart) return;
+
+      this.addingToCart = true;
+      try {
+        // Add stock property for cart validation
+        const productWithStock = {
+          ...this.sanPham,
+          stock: this.sanPham.quantity
+        };
+        await this.addToCartAction(productWithStock);
+        this.$toast.success('Đã thêm sản phẩm vào giỏ hàng!');
+      } catch (error) {
+        console.error('Lỗi khi thêm vào giỏ hàng:', error);
+        this.$toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!');
+      } finally {
+        this.addingToCart = false;
+      }
+    }
   },
 };
 </script>

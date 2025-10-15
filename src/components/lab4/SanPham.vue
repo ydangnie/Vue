@@ -41,8 +41,17 @@
                 <span v-if="sanPham.discount > 0" class="original-price">${{ sanPham.price }}</span>
                 <span class="final-price">${{ (sanPham.price * (1 - sanPham.discount / 100)).toFixed(2) }}</span>
               </div>
+              <div class="quantity-info mb-2">
+                <small class="text-muted">Còn lại: {{ sanPham.stock }} sản phẩm</small>
+              </div>
               <div class="mt-auto">
-                <router-link :to="'/chi-tiet-san-pham/' + sanPham.id" class="btn btn-primary w-100">Xem chi tiết</router-link>
+                <div class="d-grid gap-2">
+                  <button @click="addToCart(sanPham)" class="btn btn-success btn-sm" :disabled="addingToCart[sanPham.id] || sanPham.stock <= 0">
+                    <span v-if="addingToCart[sanPham.id]" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                    <i class="fas fa-cart-plus me-1"></i>{{ sanPham.stock <= 0 ? 'Hết hàng' : 'Thêm vào giỏ' }}
+                  </button>
+                  <router-link :to="'/chi-tiet-san-pham/' + sanPham.id" class="btn btn-primary btn-sm">Xem chi tiết</router-link>
+                </div>
               </div>
             </div>
           </div>
@@ -59,7 +68,8 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axios from '../../../axios.js'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'SanPham',
@@ -70,7 +80,8 @@ export default {
       categories: [],
       searchQuery: '',
       selectedCategory: '',
-      sortBy: 'title'
+      sortBy: 'title',
+      addingToCart: {}
     };
   },
   mounted() {
@@ -78,8 +89,11 @@ export default {
     this.layCategories();
   },
   methods: {
+    ...mapActions({
+      addToCartAction: 'addToCart'
+    }),
     layDuLieuSanPham() {
-      axios.get('http://localhost:3001/products')
+      axios.get('/products')
         .then(response => {
           this.danhSachSanPham = response.data;
           this.filteredProducts = [...this.danhSachSanPham];
@@ -90,7 +104,7 @@ export default {
         });
     },
     layCategories() {
-      axios.get('http://localhost:3001/categories')
+      axios.get('/categories')
         .then(response => {
           this.categories = response.data;
         })
@@ -130,6 +144,25 @@ export default {
             return a.title.localeCompare(b.title);
         }
       });
+    },
+    async addToCart(product) {
+      if (this.addingToCart[product.id]) return;
+
+      this.addingToCart[product.id] = true;
+      try {
+        // Add stock property for cart validation
+        const productWithStock = {
+          ...product,
+          stock: product.quantity
+        };
+        await this.addToCartAction(productWithStock);
+        this.$toast.success('Đã thêm sản phẩm vào giỏ hàng!');
+      } catch (error) {
+        console.error('Lỗi khi thêm vào giỏ hàng:', error);
+        this.$toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!');
+      } finally {
+        this.addingToCart[product.id] = false;
+      }
     }
   },
   watch: {

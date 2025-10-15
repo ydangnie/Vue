@@ -6,9 +6,12 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './components/lab4/router.js'
+import store from './components/store';
 
 console.log('Starting Vue app...');
-const app = createApp(App);
+const app = createApp(App); // ✅ Khởi tạo app trước
+
+app.use(store); // ✅ Sau đó mới dùng app
 console.log('Router:', router);
 app.use(router);
 

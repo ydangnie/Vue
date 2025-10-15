@@ -55,7 +55,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axios from '../../../../axios.js'
 
 export default {
   name: 'UserAdmin',
@@ -76,7 +76,7 @@ export default {
   },
   methods: {
     loadUsers() {
-      axios.get('http://localhost:3001/users')
+      axios.get('/users')
         .then(response => {
           this.users = response.data;
         })
@@ -90,7 +90,7 @@ export default {
       this.showEditForm = true;
     },
     saveUser() {
-      axios.put(`http://localhost:3001/users/${this.editingUser.id}`, this.userForm)
+      axios.put(`/users/${this.editingUser.id}`, this.userForm)
         .then(() => {
           this.loadUsers();
           this.showEditForm = false;
@@ -101,7 +101,7 @@ export default {
     },
     deleteUser(id) {
       if (confirm('Bạn có chắc muốn xóa người dùng này?')) {
-        axios.delete(`http://localhost:3001/users/${id}`)
+        axios.delete(`/users/${id}`)
           .then(() => {
             this.loadUsers();
           })

@@ -71,6 +71,9 @@
       </div>
     </section>
 
+    <!-- AI Product Suggestions -->
+    <GoiYSanPhamAI />
+
     <!-- Stats Section -->
     <section class="stats py-5">
       <div class="container">
@@ -110,10 +113,14 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from '../../../axios.js';
+import GoiYSanPhamAI from './GoiYSanPham.vue';
 
 export default {
   name: 'Home',
+  components: {
+    GoiYSanPhamAI
+  },
   data() {
     return {
       products: [],
@@ -127,7 +134,7 @@ export default {
   methods: {
     loadData() {
       // Load products
-      axios.get('http://localhost:3001/products')
+      axios.get('/products')
         .then(response => {
           this.products = response.data;
           this.featuredProducts = this.products.filter(product => product.featured);
@@ -137,7 +144,7 @@ export default {
         });
 
       // Load categories
-      axios.get('http://localhost:3001/categories')
+      axios.get('/categories')
         .then(response => {
           this.categories = response.data;
         })

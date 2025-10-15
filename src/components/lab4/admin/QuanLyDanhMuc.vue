@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axios from '../../../../axios.js'
 
 export default {
   name: 'QuanLyDanhMuc',
@@ -74,7 +74,7 @@ export default {
   },
   methods: {
     loadCategories() {
-      axios.get('http://localhost:3001/categories')
+      axios.get('/categories')
         .then(response => {
           this.categories = response.data;
         })
@@ -84,7 +84,7 @@ export default {
     },
     saveCategory() {
       if (this.editingCategory) {
-        axios.put(`http://localhost:3001/categories/${this.editingCategory.id}`, this.categoryForm)
+        axios.put(`/categories/${this.editingCategory.id}`, this.categoryForm)
           .then(() => {
             this.loadCategories();
             this.resetForm();
@@ -95,7 +95,7 @@ export default {
             this.$toast.error('Cập nhật thất bại', 'Có lỗi xảy ra khi cập nhật danh mục!');
           });
       } else {
-        axios.post('http://localhost:3001/categories', { ...this.categoryForm, id: this.nextId })
+        axios.post('/categories', { ...this.categoryForm, id: this.nextId })
           .then(() => {
             this.nextId++;
             this.loadCategories();
@@ -115,7 +115,7 @@ export default {
     },
     deleteCategory(id) {
       if (confirm('Bạn có chắc muốn xóa danh mục này?')) {
-        axios.delete(`http://localhost:3001/categories/${id}`)
+        axios.delete(`/categories/${id}`)
           .then(() => {
             this.loadCategories();
             this.$toast.success('Xóa danh mục thành công', 'Danh mục đã được xóa khỏi hệ thống!');

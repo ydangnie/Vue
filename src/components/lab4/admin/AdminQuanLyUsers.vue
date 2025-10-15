@@ -196,7 +196,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from '../../../../axios.js';
 
 export default {
   name: 'AdminQuanLyUsers',
@@ -248,7 +248,7 @@ export default {
   },
   methods: {
     loadUsers() {
-      axios.get('http://localhost:3001/users')
+      axios.get('/users')
         .then(response => {
           this.users = response.data;
           this.filteredUsers = [...this.users];
@@ -315,7 +315,7 @@ export default {
         delete updateData.password;
       }
 
-      axios.put(`http://localhost:3001/users/${this.editUserForm.id}`, updateData)
+      axios.put(`/users/${this.editUserForm.id}`, updateData)
         .then(() => {
           this.loadUsers();
           this.closeEditModal();
@@ -331,7 +331,7 @@ export default {
     },
     toggleUserRole(user) {
       const newRole = user.role === 'admin' ? 'user' : 'admin';
-      axios.put(`http://localhost:3001/users/${user.id}`, { ...user, role: newRole })
+      axios.put(`/users/${user.id}`, { ...user, role: newRole })
         .then(() => {
           this.loadUsers();
         })
@@ -342,7 +342,7 @@ export default {
     },
     deleteUser(userId) {
       if (confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-        axios.delete(`http://localhost:3001/users/${userId}`)
+        axios.delete(`/users/${userId}`)
           .then(() => {
             this.loadUsers();
           })

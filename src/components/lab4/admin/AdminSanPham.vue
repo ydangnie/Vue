@@ -102,7 +102,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axios from '../../../../axios.js'
 
 export default {
   name: 'AdminSanPham',
@@ -145,7 +145,7 @@ export default {
   },
   methods: {
     layDuLieuSanPham() {
-      axios.get('http://localhost:3001/products')
+      axios.get('/products')
         .then(response => {
           this.danhSachSanPham = response.data;
         })
@@ -155,7 +155,7 @@ export default {
         });
     },
     layCategories() {
-      axios.get('http://localhost:3001/categories')
+      axios.get('/categories')
         .then(response => {
           this.categories = response.data;
         })
@@ -202,10 +202,10 @@ export default {
 
       try {
         if (this.editingProduct) {
-          await axios.put(`http://localhost:3001/products/${this.editingProduct.id}`, productData);
+          await axios.put(`/products/${this.editingProduct.id}`, productData);
           this.$toast.success('Cập nhật thành công', `Sản phẩm "${this.productForm.title}" đã được cập nhật!`);
         } else {
-          await axios.post('http://localhost:3001/products', productData);
+          await axios.post('/products', productData);
           this.nextId++;
           this.$toast.success('Thêm sản phẩm thành công', `Sản phẩm "${this.productForm.title}" đã được thêm!`);
         }
@@ -232,7 +232,7 @@ export default {
     },
     xoaSanPham(id) {
       if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
-        axios.delete(`http://localhost:3001/products/${id}`)
+        axios.delete(`/products/${id}`)
           .then(() => {
             this.layDuLieuSanPham();
             this.$toast.success('Xóa sản phẩm thành công', 'Sản phẩm đã được xóa khỏi hệ thống!');
