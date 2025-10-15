@@ -1,4 +1,5 @@
 <script>
+// Phần <script> giữ nguyên không thay đổi
 import Toast from './components/lab4/Toast.vue';
 import { mapGetters } from 'vuex';
 
@@ -23,10 +24,8 @@ export default {
     }
   },
   mounted() {
-    console.log('App component mounted!');
     this.checkAuthStatus();
     window.addEventListener('storage', this.checkAuthStatus);
-    // Load cart on app mount
     this.$store.dispatch('loadCart');
   },
   beforeUnmount() {
@@ -69,11 +68,8 @@ export default {
 </script>
 
 <template>
-  
     <div id="app">
-      
-        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-          
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 sticky-top">
             <div class="container">
                 <router-link to="/" class="navbar-brand fw-bold">🛍️ ShopVue</router-link>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -83,70 +79,56 @@ export default {
                     <div class="navbar-nav me-auto">
                         <router-link to="/" class="nav-link">Trang chủ</router-link>
                         <router-link to="/san-pham" class="nav-link">Sản phẩm</router-link>
-                        <router-link v-if="isLoggedIn" to="/gio-hang" class="nav-link">
-                            <i class="fas fa-shopping-cart me-1"></i>Giỏ hàng
-                            <span v-if="cartItemCount > 0" class="badge bg-danger ms-1">{{ cartItemCount }}</span>
-                        </router-link>
-                        <router-link v-if="isAdmin" to="/admin/san-pham" class="nav-link">Quản lý sản phẩm</router-link>
-                        <router-link v-if="isAdmin" to="/admin/category" class="nav-link">Quản lý danh mục</router-link>
-                        <router-link v-if="isAdmin" to="/admin/users" class="nav-link">Quản lý người dùng</router-link>
-                        <router-link v-if="isAdmin" to="/admin/orders" class="nav-link">Quản lý đơn hàng</router-link>
-                        <router-link v-if="isAdmin" to="/admin/reports" class="nav-link">Báo cáo thống kê</router-link>
-                        <router-link v-if="isLoggedIn" to="/cap-nhat-user" class="nav-link">Hồ sơ</router-link>
-                        <router-link v-if="isLoggedIn" to="/lich-su-don-hang" class="nav-link">Lịch sử đơn hàng</router-link>
-                    </div>
-                    <div class="navbar-nav">
-                        <div v-if="!isLoggedIn" class="nav-item">
-                            <router-link to="/login" class="nav-link">Đăng nhập</router-link>
+                        
+                        <div v-if="isAdmin" class="nav-item dropdown">
+                          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Quản lý
+                          </a>
+                          <ul class="dropdown-menu">
+                            <li><router-link to="/admin/san-pham" class="dropdown-item">Sản phẩm</router-link></li>
+                            <li><router-link to="/admin/category" class="dropdown-item">Danh mục</router-link></li>
+                            <li><router-link to="/admin/users" class="dropdown-item">Người dùng</router-link></li>
+                            <li><router-link to="/admin/orders" class="dropdown-item">Đơn hàng</router-link></li>
+                            <li><router-link to="/admin/reports" class="dropdown-item">Báo cáo</router-link></li>
+                          </ul>
                         </div>
-                        <div v-if="!isLoggedIn" class="nav-item">
-                            <router-link to="/dangky" class="nav-link">Đăng ký</router-link>
+                        
+                        <router-link v-if="isLoggedIn && !isAdmin" to="/lich-su-don-hang" class="nav-link">Lịch sử đơn hàng</router-link>
+                    </div>
+
+                    <div class="navbar-nav align-items-center">
+                        <router-link v-if="isLoggedIn" to="/gio-hang" class="nav-link cart-icon">
+                            <i class="fas fa-shopping-cart me-1"></i>
+                            <span v-if="cartItemCount > 0" class="badge rounded-pill bg-danger cart-badge">{{ cartItemCount }}</span>
+                        </router-link>
+                        <div v-if="!isLoggedIn" class="d-flex">
+                            <router-link to="/login" class="btn btn-outline-light btn-sm me-2">Đăng nhập</router-link>
+                            <router-link to="/dangky" class="btn btn-light btn-sm">Đăng ký</router-link>
                         </div>
                         <div v-if="isLoggedIn" class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
                                 <div class="user-avatar me-2">
-                                    <i class="fas fa-user-circle fa-lg"></i>
+                                    {{ currentUser?.username?.charAt(0).toUpperCase() }}
                                 </div>
-                                <div class="user-info d-none d-md-block">
-                                    <div class="username">{{ currentUser?.username }}</div>
-                                    <small class="role-badge" :class="currentUser?.role === 'admin' ? 'admin' : 'user'">
-                                        {{ currentUser?.role === 'admin' ? 'Quản trị viên' : 'Người dùng' }}
-                                    </small>
-                                </div>
+                                <span class="d-none d-md-inline">{{ currentUser?.username }}</span>
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><router-link to="/cap-nhat-user" class="dropdown-item">Cập nhật hồ sơ</router-link></li>
-                                <li v-if="isAdmin"><router-link to="/user/admin" class="dropdown-item">Quản lý người dùng</router-link></li>
-                                <li v-if="isAdmin"><router-link to="/admin/users" class="dropdown-item">Admin: Quản lý users</router-link></li>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><router-link to="/cap-nhat-user" class="dropdown-item">Hồ sơ của tôi</router-link></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a @click="logout" class="dropdown-item text-danger" style="cursor: pointer;">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất nhanh
+                                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
                                 </a></li>
-                                <li><router-link to="/logout" class="dropdown-item">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất với xác nhận
-                                </router-link></li>
                             </ul>
-                        </div>
-                        <div v-if="isLoggedIn" class="nav-item ms-2">
-                            <button @click="logout" class="btn btn-outline-danger btn-sm" title="Đăng xuất nhanh">
-                                <i class="fas fa-sign-out-alt"></i>
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </nav>
-        <div class="container">
-            <router-view>
-           
-            </router-view>
+        <div class="container my-4">
+            <router-view></router-view>
         </div>
-<div>
-  
-</div>
-        <!-- Global Toast Notifications -->
         <Toast
-          v-for="(toast, index) in toasts"
+          v-for="toast in toasts"
           :key="toast.id"
           :show="true"
           :type="toast.type"

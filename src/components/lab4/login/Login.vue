@@ -1,16 +1,12 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <div class="login-header">
-        <h1 class="login-title">Đăng nhập</h1>
-        <p class="login-subtitle">Chào mừng bạn quay trở lại</p>
-      </div>
+      <h1 class="login-title">Đăng nhập</h1>
+      <p class="login-subtitle">Chào mừng bạn quay trở lại</p>
 
       <form @submit.prevent="dangNhap" class="login-form">
-        <div class="form-group">
-          <label for="username" class="form-label">
-            <i class="fas fa-user"></i> Tên đăng nhập
-          </label>
+        <div class="form-group mb-3">
+          <label for="username" class="form-label">Tên đăng nhập</label>
           <input
             v-model="username"
             id="username"
@@ -21,10 +17,8 @@
           />
         </div>
 
-        <div class="form-group">
-          <label for="password" class="form-label">
-            <i class="fas fa-lock"></i> Mật khẩu
-          </label>
+        <div class="form-group mb-4">
+          <label for="password" class="form-label">Mật khẩu</label>
           <input
             v-model="password"
             id="password"
@@ -35,10 +29,9 @@
           />
         </div>
 
-        <button type="submit" class="btn-login" :disabled="loading">
-          <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
-          <i class="fas fa-sign-in-alt me-2"></i>
-          {{ loading ? 'Đang đăng nhập...' : 'Đăng nhập' }}
+        <button type="submit" class="btn btn-primary w-100 btn-lg" :disabled="loading">
+          <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+          {{ loading ? 'Đang xử lý...' : 'Đăng nhập' }}
         </button>
       </form>
 
@@ -53,6 +46,7 @@
 </template>
 
 <script>
+// Phần <script> giữ nguyên không thay đổi
 import axios from '../../../../axios.js'
 
 export default {

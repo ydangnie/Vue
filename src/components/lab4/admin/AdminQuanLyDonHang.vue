@@ -10,7 +10,6 @@
         </router-link>
       </div>
 
-      <!-- Statistics Cards -->
       <div class="row mb-4">
         <div class="col-md-3">
           <div class="stat-card bg-primary text-white">
@@ -58,7 +57,6 @@
         </div>
       </div>
 
-      <!-- Search and Filter -->
       <div class="card mb-4">
         <div class="card-body">
           <div class="row">
@@ -92,7 +90,6 @@
         </div>
       </div>
 
-      <!-- Orders Table -->
       <div class="card">
         <div class="card-header">
           <h5 class="mb-0">Danh sách đơn hàng</h5>
@@ -124,7 +121,7 @@
                     </div>
                   </td>
                   <td>
-                    <div v-for="item in order.slice(0, 2)" :key="item.id" class="mb-1">
+                    <div v-for="item in order.items.slice(0, 2)" :key="item.id" class="mb-1">
                       <small>{{ item.title }} (x{{ item.quantity }})</small>
                     </div>
                     <small v-if="order.items.length > 2" class="text-muted">
@@ -173,7 +170,6 @@
             </table>
           </div>
 
-          <!-- No orders message -->
           <div v-if="filteredOrders.length === 0" class="text-center py-5">
             <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
             <h4>Không tìm thấy đơn hàng nào</h4>
@@ -182,7 +178,6 @@
         </div>
       </div>
 
-      <!-- Order Detail Modal -->
       <div v-if="showOrderModal" class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
@@ -347,7 +342,8 @@ export default {
     updateOrderStatus(order, newStatus) {
       const statusText = this.getStatusText(newStatus);
       if (confirm(`Bạn có chắc muốn cập nhật trạng thái đơn hàng #${order.id} thành "${statusText}"?`)) {
-        axios.put(`/orders/${order.id}`, { ...order, status: newStatus })
+        // SỬA Ở ĐÂY: Dùng PATCH và chỉ gửi status
+        axios.patch(`/orders/${order.id}`, { status: newStatus })
           .then(() => {
             this.loadOrders();
             this.$toast.success(`Đã cập nhật trạng thái đơn hàng thành "${statusText}"`);

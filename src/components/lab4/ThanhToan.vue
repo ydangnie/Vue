@@ -73,7 +73,7 @@
           </div>
         </div>
 
-        <div class="col-lg-4">
+        <div class="col-lg-4" id="clol">
           <div class="card sticky-top">
             <div class="card-header">
               <h5 class="mb-0">Tóm tắt đơn hàng</h5>
@@ -294,5 +294,8 @@ export default {
 .breadcrumb-item a {
   color: #007bff;
   text-decoration: none;
+}
+#clol{
+  z-index: 1;
 }
 </style>

@@ -354,7 +354,7 @@
       ],
       "total": 100,
       "paymentMethod": "cod",
-      "status": "pending",
+      "status": "cancelled",
       "createdAt": "2025-01-01T00:00:00.000Z"
     },
     {
@@ -471,8 +471,109 @@
       "promoDiscount": 0,
       "paymentMethod": "cod",
       "notes": "",
-      "status": "pending",
+      "status": "delivered",
       "createdAt": "2025-10-15T03:49:38.839Z"
+    },
+    {
+      "id": "fa8d",
+      "customer": {
+        "name": "admin",
+        "email": "admin@gmail.com",
+        "phone": "01298482834",
+        "address": "Buôn Ma thuột"
+      },
+      "items": [
+        {
+          "id": "1759891048307",
+          "title": "Áo",
+          "price": 50,
+          "category": "Sports",
+          "description": "diksdnfjusndoufsd",
+          "quantity": 1,
+          "discount": 1,
+          "images": [
+            "https://picsum.photos/seed/placeholder/400/400"
+          ],
+          "featured": false,
+          "stock": 9
+        }
+      ],
+      "total": 49.5,
+      "originalTotal": 49.5,
+      "promoCode": null,
+      "promoDiscount": 0,
+      "paymentMethod": "cod",
+      "notes": "can than",
+      "status": "delivered",
+      "createdAt": "2025-10-15T04:56:24.382Z"
+    },
+    {
+      "id": "9f3d",
+      "customer": {
+        "name": "admin",
+        "email": "admin@gmail.com",
+        "phone": "0123456789",
+        "address": "Buôn Ma thuột"
+      },
+      "items": [
+        {
+          "title": "Aó",
+          "price": 100,
+          "category": "Fashion",
+          "description": "hjauodhfuohsdufhusdfs",
+          "quantity": 1,
+          "discount": 0,
+          "images": [
+            "https://picsum.photos/seed/placeholder/400/400",
+            "https://picsum.photos/seed/placeholder/400/400",
+            "https://picsum.photos/seed/placeholder/400/400"
+          ],
+          "featured": true,
+          "id": "1759891501439",
+          "stock": 80
+        }
+      ],
+      "total": 100,
+      "originalTotal": 100,
+      "promoCode": null,
+      "promoDiscount": 0,
+      "paymentMethod": "cod",
+      "notes": "cẩn thận",
+      "status": "delivered",
+      "createdAt": "2025-10-15T05:36:00.620Z"
+    },
+    {
+      "id": "db72",
+      "customer": {
+        "name": "abc1234",
+        "email": "abc@gmail.com",
+        "phone": "09586956565",
+        "address": "Buôn Ma thuột"
+      },
+      "items": [
+        {
+          "id": "1759891048307",
+          "title": "Áo",
+          "price": 50,
+          "category": "Sports",
+          "description": "diksdnfjusndoufsd",
+          "quantity": 1,
+          "discount": 1,
+          "images": [
+            "https://picsum.photos/seed/placeholder/400/400"
+          ],
+          "featured": false,
+          "stock": 9
+        }
+      ],
+      "total": 49.5,
+      "originalTotal": 49.5,
+      "promoCode": null,
+      "promoDiscount": 0,
+      "paymentMethod": "cod",
+      "notes": "đâsdasdas",
+      "status": "pending",
+      "createdAt": "2025-10-15T05:38:21.786Z"
     }
   ],
   "cart": [

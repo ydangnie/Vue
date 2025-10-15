@@ -1,35 +1,91 @@
-/* @import './base.css';
+/* Định nghĩa các biến màu chính */
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+:root {
+    --color-background: #f8f9fa;
+    /* Xám rất nhạt cho nền trang */
+    --color-background-soft: #ffffff;
+    /* Trắng cho các card, modal */
+    --color-border: #dee2e6;
+    /* Xám nhạt cho đường viền */
+    --color-text-primary: #212529;
+    /* Đen đậm cho văn bản chính */
+    --color-text-secondary: #6c757d;
+    /* Xám cho văn bản phụ */
+    --color-heading: #1a1a1a;
+    /* Đen cho tiêu đề */
+    --color-primary: #343a40;
+    /* Đen/Xám đậm cho nút chính */
+    --color-primary-hover: #495057;
+    /* Xám đậm hơn khi hover */
+    --color-secondary: #6c757d;
+    /* Xám cho nút phụ */
+    --color-secondary-hover: #5a6268;
+    --color-success: #198754;
+    --color-danger: #dc3545;
+    --color-warning: #ffc107;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --border-radius: 0.5rem;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
+
+/* Kiểu dáng cơ bản */
+
+body {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--color-heading);
+    font-weight: 600;
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
+.card {
+    border: 1px solid var(--color-border);
+    box-shadow: var(--box-shadow);
+    border-radius: var(--border-radius);
+    background-color: var(--color-background-soft);
+}
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
-} */
+.btn {
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+}
+
+.btn-outline-primary {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.form-control:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.25rem rgba(52, 58, 64, 0.25);
+}
+
+.modal-content {
+    background-color: var(--color-background-soft);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
