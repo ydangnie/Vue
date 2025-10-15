@@ -10,7 +10,6 @@
       </nav>
 
       <div class="row">
-        <!-- Product Images -->
         <div class="col-md-6">
           <div class="product-images">
             <div class="main-image mb-3">
@@ -25,7 +24,6 @@
           </div>
         </div>
 
-        <!-- Product Info -->
         <div class="col-md-6">
           <div class="product-info">
             <h1 class="product-title mb-3">{{ sanPham.title }}</h1>
@@ -45,8 +43,8 @@
             <div class="product-meta mb-4">
               <p><strong>Danh mục:</strong> <span class="badge bg-primary">{{ sanPham.category }}</span></p>
               <p><strong>Số lượng còn:</strong>
-                <span :class="sanPham.stock > 0 ? 'text-success' : 'text-danger'">
-                  {{ sanPham.stock > 0 ? sanPham.stock + ' sản phẩm' : 'Hết hàng' }}
+                <span :class="sanPham.quantity > 0 ? 'text-success' : 'text-danger'">
+                  {{ sanPham.quantity > 0 ? sanPham.quantity + ' sản phẩm' : 'Hết hàng' }}
                 </span>
               </p>
               <p v-if="sanPham.featured" class="text-warning"><i class="fas fa-star"></i> Sản phẩm nổi bật</p>
@@ -56,11 +54,20 @@
               <h5>Mô tả sản phẩm</h5>
               <p>{{ sanPham.description }}</p>
             </div>
+            
+            <div class="mb-4" v-if="sanPham.quantity > 0">
+                <label class="form-label fw-bold">Số lượng:</label>
+                <div class="quantity-controls d-flex align-items-center">
+                  <button @click="decreaseQuantity" class="btn btn-outline-secondary btn-sm">-</button>
+                  <input type="number" v-model.number="quantityToAdd" class="form-control form-control-sm quantity-input mx-2" min="1" :max="sanPham.quantity">
+                  <button @click="increaseQuantity" class="btn btn-outline-secondary btn-sm">+</button>
+                </div>
+            </div>
 
             <div class="action-buttons">
-              <button @click="addToCart" class="btn btn-primary btn-lg me-3" :disabled="addingToCart || sanPham.stock <= 0">
+              <button @click="addToCart" class="btn btn-primary btn-lg me-3" :disabled="addingToCart || sanPham.quantity <= 0">
                 <span v-if="addingToCart" class="spinner-border spinner-border-sm me-2" role="status"></span>
-                <i class="fas fa-cart-plus"></i> {{ addingToCart ? 'Đang thêm...' : (sanPham.stock <= 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng') }}
+                <i class="fas fa-cart-plus"></i> {{ addingToCart ? 'Đang thêm...' : (sanPham.quantity <= 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng') }}
               </button>
               <button class="btn btn-outline-secondary btn-lg">
                 <i class="fas fa-heart"></i> Yêu thích
@@ -70,7 +77,6 @@
         </div>
       </div>
 
-      <!-- Related Products -->
       <SanPhamLienQuan
         :current-product-id="sanPham.id"
         :category="sanPham.category"
@@ -99,7 +105,8 @@ export default {
     return {
       sanPham: {},
       selectedImage: '',
-      addingToCart: false
+      addingToCart: false,
+      quantityToAdd: 1, // ADD: Dữ liệu cho số lượng
     };
   },
   mounted() {
@@ -116,8 +123,6 @@ export default {
           this.sanPham = response.data;
           if (this.sanPham.images && this.sanPham.images.length > 0) {
             this.selectedImage = this.sanPham.images[0];
-          } else if (this.sanPham.image) {
-            this.selectedImage = this.sanPham.image;
           } else {
             this.selectedImage = 'https://via.placeholder.com/400x400?text=No+Image';
           }
@@ -126,35 +131,74 @@ export default {
           console.error('Lỗi:', error);
         });
     },
+    // ADD: Hàm tăng số lượng
+    increaseQuantity() {
+        if (this.quantityToAdd < this.sanPham.quantity) {
+            this.quantityToAdd++;
+        }
+    },
+    // ADD: Hàm giảm số lượng
+    decreaseQuantity() {
+        if (this.quantityToAdd > 1) {
+            this.quantityToAdd--;
+        }
+    },
+    // FIX: Cập nhật hàm addToCart
     async addToCart() {
-      if (this.addingToCart) return;
+      if (this.addingToCart || this.sanPham.quantity <= 0) return;
 
       this.addingToCart = true;
       try {
         const productWithStock = {
           ...this.sanPham,
-          stock: this.sanPham.quantity // Sử dụng 'quantity' làm 'stock'
+          stock: this.sanPham.quantity 
         };
-        await this.addToCartAction(productWithStock);
-        this.$toast.success('Thành công!', 'Đã thêm sản phẩm vào giỏ hàng.');
+        await this.addToCartAction({ product: productWithStock, quantity: this.quantityToAdd });
+        this.$toast.success('Thành công!', `${this.quantityToAdd} sản phẩm đã được thêm vào giỏ.`);
       } catch (error) {
         console.error('Lỗi khi thêm vào giỏ hàng:', error);
-        this.$toast.error('Thêm thất bại!', error.message || 'Không đủ hàng tồn kho.');
+        this.$toast.error('Thêm thất bại!', error.message || 'Có lỗi xảy ra.');
       } finally {
         this.addingToCart = false;
       }
     }
   },
    watch: {
-    // Thêm watch để tải lại dữ liệu khi route thay đổi (khi xem sản phẩm liên quan)
     '$route.params.id'() {
       this.layChiTietSanPham();
+      this.quantityToAdd = 1; // Reset số lượng về 1 khi chuyển trang
+    },
+    // ADD: Theo dõi để số lượng không vượt quá tồn kho
+    quantityToAdd(newValue) {
+        if (newValue > this.sanPham.quantity) {
+            this.quantityToAdd = this.sanPham.quantity;
+        }
+        if (newValue < 1) {
+            this.quantityToAdd = 1;
+        }
     }
   }
 };
 </script>
 
 <style scoped>
+/* CSS giữ nguyên, thêm style cho bộ điều khiển số lượng */
+.quantity-controls {
+  max-width: 150px;
+}
+.quantity-input {
+  text-align: center;
+  font-weight: bold;
+}
+/* Loại bỏ mũi tên tăng giảm mặc định của trình duyệt */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
 .chi-tiet-san-pham {
   background-color: #f8f9fa;
   min-height: 100vh;

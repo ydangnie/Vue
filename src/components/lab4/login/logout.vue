@@ -78,34 +78,20 @@ export default {
     };
   },
   mounted() {
-    // Check if user is logged in
-    const user = localStorage.getItem('user');
-    if (user) {
-      try {
-        this.currentUser = JSON.parse(user);
-      } catch (e) {
-        this.redirectToLogin();
-      }
-    } else {
+    this.currentUser = JSON.parse(localStorage.getItem('user'));
+    if (!this.currentUser) {
       this.redirectToLogin();
     }
   },
   methods: {
     confirmLogout() {
-      // Clear user data
-      localStorage.removeItem('user');
+      // FIX: Gọi action logout từ Vuex để xóa cả user và cart
+      this.$store.dispatch('logout');
       this.currentUser = null;
-
-      // Show success modal
       this.showSuccessModal = true;
-
-      // Auto redirect after 3 seconds
-      setTimeout(() => {
-        this.redirectToHome();
-      }, 3000);
+      setTimeout(() => this.redirectToHome(), 3000);
     },
     cancelLogout() {
-      // Go back to previous page or home
       this.$router.go(-1);
     },
     redirectToHome() {

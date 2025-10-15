@@ -63,16 +63,6 @@
           />
         </div>
 
-        <div class="form-group">
-          <label for="role" class="form-label">
-            <i class="fas fa-user-tag"></i> Vai trò
-          </label>
-          <select v-model="duLieuForm.role" id="role" class="form-control" required>
-            <option value="user">Người dùng</option>
-            <option value="admin">Quản trị viên</option>
-          </select>
-        </div>
-
         <button type="submit" class="btn-register" :disabled="loading">
           <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
           <i class="fas fa-user-plus me-2"></i>
@@ -101,7 +91,7 @@ export default {
         username: '',
         email: '',
         password: '',
-        role: 'user'
+        role: 'user' // Mặc định tất cả tài khoản mới là 'user'
       },
       confirmPassword: '',
       loading: false
@@ -111,35 +101,32 @@ export default {
     async dangKy() {
       if (this.loading) return;
 
-      // Validation
       if (!this.duLieuForm.username || !this.duLieuForm.email || !this.duLieuForm.password) {
         this.$toast.error('Vui lòng điền đầy đủ thông tin!');
         return;
       }
-
       if (this.duLieuForm.password !== this.confirmPassword) {
         this.$toast.error('Mật khẩu xác nhận không khớp!');
         return;
       }
-
       if (this.duLieuForm.password.length < 6) {
         this.$toast.error('Mật khẩu phải có ít nhất 6 ký tự!');
         return;
       }
 
       this.loading = true;
-
       try {
         const response = await axios.get('/users');
         const danhSachNguoiDung = response.data;
 
         if (danhSachNguoiDung.some(user => user.username === this.duLieuForm.username)) {
-          this.$toast.warning('Tên đăng nhập đã tồn tại', 'Vui lòng chọn tên đăng nhập khác!');
+          this.$toast.warning('Tên đăng nhập đã tồn tại!');
+          this.loading = false;
           return;
         }
-
         if (danhSachNguoiDung.some(user => user.email === this.duLieuForm.email)) {
-          this.$toast.warning('Email đã được sử dụng', 'Vui lòng sử dụng email khác!');
+          this.$toast.warning('Email đã được sử dụng!');
+          this.loading = false;
           return;
         }
 
@@ -152,12 +139,11 @@ export default {
         };
 
         await axios.post('/users', moiNguoiDung);
-        this.$toast.success('Đăng ký thành công', 'Tài khoản của bạn đã được tạo!');
+        this.$toast.success('Đăng ký thành công!');
         this.$router.push('/login');
 
       } catch (error) {
-        console.error('Lỗi khi đăng ký:', error);
-        this.$toast.error('Đăng ký thất bại', 'Có lỗi xảy ra, vui lòng thử lại!');
+        this.$toast.error('Đăng ký thất bại!');
       } finally {
         this.loading = false;
       }
@@ -165,7 +151,6 @@ export default {
   },
 };
 </script>
-
 <style scoped>
 .register-container {
   min-height: 100vh;

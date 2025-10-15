@@ -67,28 +67,32 @@ export default {
   methods: {
     async dangNhap() {
       if (this.loading) return;
-
       if (!this.username || !this.password) {
         this.$toast.error('Vui lòng nhập đầy đủ thông tin!');
         return;
       }
-
       this.loading = true;
-
       try {
         const response = await axios.get('/users');
         const user = response.data.find(u => u.username === this.username && u.password === this.password);
 
         if (user) {
-          localStorage.setItem('user', JSON.stringify(user));
-          this.$toast.success('Đăng nhập thành công', `Chào mừng ${user.username}!`);
-          this.$router.push('/');
+          this.$store.dispatch('setUser', user);
+          this.$toast.success('Đăng nhập thành công!');
+          
+          const redirectPath = localStorage.getItem('redirectPath');
+          if (redirectPath) {
+            localStorage.removeItem('redirectPath');
+            this.$router.push(redirectPath);
+          } else {
+            this.$router.push('/');
+          }
+
         } else {
-          this.$toast.error('Đăng nhập thất bại', 'Tên đăng nhập hoặc mật khẩu không đúng!');
+          this.$toast.error('Tên đăng nhập hoặc mật khẩu không đúng!');
         }
       } catch (error) {
-        console.error('Lỗi:', error);
-        this.$toast.error('Lỗi hệ thống', 'Không thể kết nối đến máy chủ!');
+        this.$toast.error('Lỗi hệ thống!');
       } finally {
         this.loading = false;
       }
@@ -96,6 +100,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .login-container {

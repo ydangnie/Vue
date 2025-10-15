@@ -3,7 +3,6 @@
     <div class="container">
       <h1 class="mb-4">Danh sách sản phẩm</h1>
 
-      <!-- Search and Filter -->
       <div class="row mb-4">
         <div class="col-md-6">
           <input v-model="searchQuery" @input="filterProducts" type="text" class="form-control" placeholder="Tìm kiếm sản phẩm...">
@@ -24,7 +23,6 @@
         </div>
       </div>
 
-      <!-- Products Grid -->
       <div class="row">
         <div v-for="sanPham in filteredProducts" :key="sanPham.id" class="col-lg-3 col-md-4 col-sm-6 mb-4">
           <div class="card h-100 product-card">
@@ -42,13 +40,13 @@
                 <span class="final-price">${{ (sanPham.price * (1 - sanPham.discount / 100)).toFixed(2) }}</span>
               </div>
               <div class="quantity-info mb-2">
-                <small class="text-muted">Còn lại: {{ sanPham.stock }} sản phẩm</small>
+                <small class="text-muted">Còn lại: {{ sanPham.quantity }} sản phẩm</small>
               </div>
               <div class="mt-auto">
                 <div class="d-grid gap-2">
-                  <button @click="addToCart(sanPham)" class="btn btn-success btn-sm" :disabled="addingToCart[sanPham.id] || sanPham.stock <= 0">
+                   <button @click="addToCart(sanPham)" class="btn btn-success btn-sm" :disabled="addingToCart[sanPham.id] || sanPham.quantity <= 0">
                     <span v-if="addingToCart[sanPham.id]" class="spinner-border spinner-border-sm me-1" role="status"></span>
-                    <i class="fas fa-cart-plus me-1"></i>{{ sanPham.stock <= 0 ? 'Hết hàng' : 'Thêm vào giỏ' }}
+                    <i class="fas fa-cart-plus me-1"></i>{{ sanPham.quantity <= 0 ? 'Hết hàng' : 'Thêm vào giỏ' }}
                   </button>
                   <router-link :to="'/chi-tiet-san-pham/' + sanPham.id" class="btn btn-primary btn-sm">Xem chi tiết</router-link>
                 </div>
@@ -58,7 +56,6 @@
         </div>
       </div>
 
-      <!-- No products message -->
       <div v-if="filteredProducts.length === 0" class="text-center mt-5">
         <h3>Không tìm thấy sản phẩm nào</h3>
         <p>Hãy thử tìm kiếm với từ khóa khác</p>
@@ -150,16 +147,16 @@ export default {
 
       this.addingToCart[product.id] = true;
       try {
-        // Add stock property for cart validation
         const productWithStock = {
           ...product,
-          stock: product.quantity
+          stock: product.quantity // Chuyển 'quantity' từ db.json thành 'stock'
         };
-        await this.addToCartAction(productWithStock);
-        this.$toast.success('Đã thêm sản phẩm vào giỏ hàng!');
+        // Gọi action với số lượng là 1
+        await this.addToCartAction({ product: productWithStock, quantity: 1 });
+        this.$toast.success('Thành công!', 'Đã thêm sản phẩm vào giỏ hàng.');
       } catch (error) {
         console.error('Lỗi khi thêm vào giỏ hàng:', error);
-        this.$toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!');
+        this.$toast.error('Thêm thất bại!', error.message || 'Có lỗi xảy ra, vui lòng thử lại.');
       } finally {
         this.addingToCart[product.id] = false;
       }

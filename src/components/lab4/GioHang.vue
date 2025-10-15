@@ -3,10 +3,7 @@ import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'GioHang',
-  async mounted() {
-    // Tải giỏ hàng từ store
-    await this.$store.dispatch('loadCart');
-  },
+  // mounted() hook đã được xóa bỏ vì không cần thiết
   computed: {
     ...mapState(['cart']),
     ...mapGetters(['cartTotal', 'cartItemCount'])
@@ -44,6 +41,7 @@ export default {
   }
 }
 </script>
+
 
 <template>
   <div class="gio-hang">
