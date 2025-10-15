@@ -145,7 +145,7 @@ export default {
 .final-price {
   font-size: 1.1rem;
   font-weight: bold;
-  color: #e74c3c;
+  color: #000000;
 }
 
 .original-price {
@@ -168,15 +168,15 @@ export default {
 
 .item-total {
   font-weight: bold;
-  color: #28a745;
+  color: #464747;
 }
 
 .cart-summary {
   border: none;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #747578 0%, #2d2d2d 100%);
+  color: rgb(255, 255, 255);
 }
 
 .cart-summary .card-body {
@@ -192,24 +192,26 @@ export default {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #747578 0%, #f1f1f1 100%);
   border: none;
   transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  background: linear-gradient(135deg, #747578 0%, #ffffff 100%);
   transform: translateY(-2px);
 }
 
 .btn-success {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: linear-gradient(135deg, #000000 0%, #000000 100%);
   border: none;
   transition: all 0.3s ease;
+  color: rgb(255, 255, 255);
+  border: solid rgb(0, 0, 0);
 }
 
 .btn-success:hover {
-  background: linear-gradient(135deg, #218838 0%, #1aa085 100%);
+  border: solid rgb(255, 255, 255);
   transform: translateY(-2px);
 }
 

@@ -498,7 +498,7 @@ export default {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #747578 0%, #000000 100%);
   color: white;
   display: flex;
   align-items: center;
@@ -513,7 +513,7 @@ export default {
 }
 
 .card-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #747578 0%, #000000 100%);
   color: white;
   border-radius: 10px 10px 0 0 !important;
   border-bottom: none;

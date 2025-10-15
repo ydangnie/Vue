@@ -44,7 +44,7 @@
               </div>
               <div class="mt-auto">
                 <div class="d-grid gap-2">
-                   <button @click="addToCart(sanPham)" class="btn btn-success btn-sm" :disabled="addingToCart[sanPham.id] || sanPham.quantity <= 0">
+                   <button id="them" @click="addToCart(sanPham)" class="btn btn-success btn-sm" :disabled="addingToCart[sanPham.id] || sanPham.quantity <= 0">
                     <span v-if="addingToCart[sanPham.id]" class="spinner-border spinner-border-sm me-1" role="status"></span>
                     <i class="fas fa-cart-plus me-1"></i>{{ sanPham.quantity <= 0 ? 'Hết hàng' : 'Thêm vào giỏ' }}
                   </button>
@@ -258,13 +258,19 @@ export default {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #747578 0%, #000000 100%);
   border: none;
   transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  background: linear-gradient(135deg, #747578 0%, #000000 100%);
   transform: translateY(-2px);
+}
+#them{
+  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+  border: black solid black;
+  transition: all 0.3s ease;
+  color: black;
 }
 </style>

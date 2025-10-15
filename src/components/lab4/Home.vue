@@ -5,7 +5,8 @@
       <div class="container">
         <div class="row align-items-center">
           <div class="col-lg-6">
-            <h1 class="display-4 fw-bold mb-4">Chào mừng đến với cửa hàng của chúng tôi</h1>
+            <h3 class="display-4 fw-bold mb-4">
+              <span>AZALMAN STORE</span> <br><span id="chao"></span></h3>
             <p class="lead mb-4">Khám phá bộ sưu tập sản phẩm chất lượng cao với giá cả phải chăng</p>
             <router-link to="/san-pham" class="btn btn-light btn-lg">
               <i class="fas fa-shopping-bag"></i> Mua sắm ngay
@@ -158,7 +159,7 @@ export default {
 
 <style scoped>
 .hero-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #747578 0%, #000000 100%);
   min-height: 60vh;
   display: flex;
   align-items: center;
@@ -255,13 +256,13 @@ export default {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #000000 0%, #000000 100%);
   border: none;
   transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  background: linear-gradient(135deg, #313131 0%, #3e3e3e 100%);
   transform: translateY(-2px);
 }
 

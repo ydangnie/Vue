@@ -229,7 +229,7 @@ export default {
 }
 
 .register-link:hover {
-  color: #5a6fd8;
+  color: linear-gradient(135deg, #747578 0%, #000000 100%);
   text-decoration: underline;
 }
 

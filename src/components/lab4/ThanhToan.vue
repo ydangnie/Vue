@@ -277,7 +277,7 @@ export default {
 }
 
 .btn-success:hover {
-  background: linear-gradient(135deg, #218838 0%, #1aa085 100%);
+  background: linear-gradient(135deg, #000000 0%, #1aa085 100%);
   transform: translateY(-2px);
 }
 

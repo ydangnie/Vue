@@ -3,7 +3,6 @@
     <div class="container">
       <h1 class="mb-4">Lịch sử đơn hàng</h1>
 
-      <!-- Order Statistics -->
       <div class="row mb-4">
         <div class="col-md-3">
           <div class="stat-card bg-primary text-white">
@@ -51,7 +50,6 @@
         </div>
       </div>
 
-      <!-- Orders List -->
       <div class="card">
         <div class="card-header">
           <h5 class="mb-0">Danh sách đơn hàng của bạn</h5>
@@ -98,6 +96,9 @@
                         <button @click="viewOrderDetail(order)" class="btn btn-outline-primary btn-sm mt-2">
                           <i class="fas fa-eye"></i> Xem chi tiết
                         </button>
+                        <button @click="cancelOrder(order)" v-if="order.status === 'pending' || order.status === 'processing'" class="btn btn-outline-danger btn-sm mt-2 ms-2">
+                            <i class="fas fa-times"></i> Hủy đơn
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -106,7 +107,6 @@
             </div>
           </div>
 
-          <!-- Empty State -->
           <div v-else class="text-center py-5">
             <i class="fas fa-shopping-cart fa-4x text-muted mb-4"></i>
             <h4>Bạn chưa có đơn hàng nào</h4>
@@ -118,7 +118,6 @@
         </div>
       </div>
 
-      <!-- Order Detail Modal -->
       <div v-if="showOrderModal" class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
@@ -248,6 +247,18 @@ export default {
       this.showOrderModal = false;
       this.selectedOrder = null;
     },
+    async cancelOrder(order) {
+      if (confirm(`Bạn có chắc chắn muốn hủy đơn hàng #${order.id}?`)) {
+        try {
+          await axios.patch(`/orders/${order.id}`, { status: 'cancelled' });
+          this.$toast.success('Hủy đơn hàng thành công!');
+          this.loadUserOrders(); // Reload orders to reflect the change
+        } catch (error) {
+          console.error('Lỗi khi hủy đơn hàng:', error);
+          this.$toast.error('Có lỗi xảy ra khi hủy đơn hàng.');
+        }
+      }
+    },
     async reorder() {
       if (!this.selectedOrder) return;
 
@@ -344,7 +355,7 @@ export default {
 }
 
 .order-card .card-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #747578 0%, #000000 100%);
   color: white;
   border-radius: 10px 10px 0 0 !important;
   border-bottom: none;
@@ -360,13 +371,13 @@ export default {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #747578 0%, #000000 100%);
   border: none;
   transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  background: linear-gradient(135deg, #747578 0%, #000000 100%);
   transform: translateY(-2px);
 }
 
