@@ -17,8 +17,13 @@ import Logout from './login/logout.vue';
 import UserAdmin from './user/UserAdmin.vue';
 import CapNhatUser from './user/CapNhatUser.vue';
 import LichSuDonHang from './user/LichSuDonHang.vue';
+import VnPayReturn from './VnPayReturn.vue'; // Thêm import này
 
-const routes = [
+const routes = [{
+        path: '/vnpay_return',
+        component: VnPayReturn,
+        name: 'VnPayReturn'
+    },
     { path: '/', component: Home, name: 'Home' },
     { path: '/san-pham', component: SanPham, name: 'SanPham' },
     { path: '/chi-tiet-san-pham/:id', component: ChiTietSanPham, name: 'ChiTietSanPham' },

@@ -117,7 +117,8 @@
       "username": "abc1234",
       "email": "abc@gmail.com",
       "password": "abc1234",
-      "role": "user"
+      "role": "user",
+      "age": 19
     },
     {
       "id": "1760443508831",
@@ -638,7 +639,7 @@
       "promoDiscount": 0,
       "paymentMethod": "vnpay",
       "notes": "cdscs",
-      "status": "pending",
+      "status": "delivered",
       "createdAt": "2025-10-15T08:32:03.507Z"
     }
   ],

@@ -145,8 +145,10 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex'
-import axios from '../../../axios.js'
+import { mapState, mapGetters, mapActions } from 'vuex';
+import axios from '../../../axios.js';
+// Import vnpay instance từ file models.js
+import { vnpay } from '../modules/models.js'; 
 
 export default {
   name: 'ThanhToan',
@@ -164,7 +166,7 @@ export default {
       },
       promoDiscount: 0,
       promoCodeInfo: null
-    }
+    };
   },
   computed: {
     ...mapState(['cart']),
@@ -187,48 +189,94 @@ export default {
     },
     async placeOrder() {
       if (this.cart.length === 0) {
-        this.$toast.error('Giỏ hàng trống!')
-        return
+        this.$toast.error('Giỏ hàng trống!');
+        return;
       }
       if (!this.orderInfo.customerName || !this.orderInfo.customerEmail || !this.orderInfo.customerPhone || !this.orderInfo.shippingAddress) {
-        this.$toast.error('Vui lòng điền đầy đủ thông tin!')
-        return
+        this.$toast.error('Vui lòng điền đầy đủ thông tin!');
+        return;
       }
-      this.placingOrder = true
-      try {
-        const orderData = {
-          customer: {
-            name: this.orderInfo.customerName,
-            email: this.orderInfo.customerEmail,
-            phone: this.orderInfo.customerPhone,
-            address: this.orderInfo.shippingAddress
-          },
-          items: [...this.cart],
-          total: this.finalTotal,
-          originalTotal: this.cartTotal,
-          promoCode: this.orderInfo.promoCode || null,
-          promoDiscount: this.promoDiscount,
-          paymentMethod: this.orderInfo.paymentMethod,
-          notes: this.orderInfo.notes,
-          status: 'pending',
-          createdAt: new Date().toISOString()
+      
+      // Nếu phương thức là VNPay
+      if (this.orderInfo.paymentMethod === 'vnpay') {
+        this.placingOrder = true;
+        try {
+          const orderId = Date.now().toString();
+          const amountInVND = this.finalTotal * 23000; // Tỷ giá tạm tính
+
+          // Tạo URL thanh toán
+          const paymentUrl = vnpay.buildPaymentUrl({
+              vnp_Amount: Math.round(amountInVND * 100), // Làm tròn số tiền để đảm bảo là số nguyên
+              vnp_TxnRef: orderId,
+              vnp_OrderInfo: `Thanh toan don hang ${orderId}`,
+              vnp_OrderType: 'other',
+              vnp_ReturnUrl: `http://localhost:5173/vnpay_return`,
+              vnp_Locale: 'vn',
+          });
+
+          // Lưu thông tin đơn hàng tạm thời vào localStorage
+          const orderData = {
+            id: orderId,
+            customer: {
+              name: this.orderInfo.customerName,
+              email: this.orderInfo.customerEmail,
+              phone: this.orderInfo.customerPhone,
+              address: this.orderInfo.shippingAddress
+            },
+            items: [...this.cart],
+            total: this.finalTotal,
+            paymentMethod: 'vnpay',
+            status: 'pending', 
+            createdAt: new Date().toISOString()
+          };
+          localStorage.setItem('pendingOrder', JSON.stringify(orderData));
+
+          // Chuyển hướng người dùng đến cổng VNPay
+          window.location.href = paymentUrl;
+
+        } catch (error) {
+          console.error('VNPay error:', error);
+          this.$toast.error('Có lỗi xảy ra khi tạo yêu cầu thanh toán VNPay!');
+          this.placingOrder = false;
         }
+      } else {
+        // Xử lý các phương thức thanh toán khác như cũ
+        this.placingOrder = true;
+        try {
+          const orderData = {
+            customer: {
+              name: this.orderInfo.customerName,
+              email: this.orderInfo.customerEmail,
+              phone: this.orderInfo.customerPhone,
+              address: this.orderInfo.shippingAddress
+            },
+            items: [...this.cart],
+            total: this.finalTotal,
+            originalTotal: this.cartTotal,
+            promoCode: this.orderInfo.promoCode || null,
+            promoDiscount: this.promoDiscount,
+            paymentMethod: this.orderInfo.paymentMethod,
+            notes: this.orderInfo.notes,
+            status: 'pending',
+            createdAt: new Date().toISOString()
+          };
 
-        const response = await axios.post('/orders', orderData)
-        const savedOrder = response.data;
+          const response = await axios.post('/orders', orderData);
+          const savedOrder = response.data;
 
-        this.clearCart()
-        this.$toast.success('Đặt hàng thành công!')
+          this.clearCart();
+          this.$toast.success('Đặt hàng thành công!');
 
-        this.$router.push({
-          name: 'DonHangThanhCong',
-          params: { orderId: savedOrder.id }
-        })
+          this.$router.push({
+            name: 'DonHangThanhCong',
+            params: { orderId: savedOrder.id }
+          });
 
-      } catch (error) {
-        this.$toast.error('Có lỗi xảy ra khi đặt hàng!');
-      } finally {
-        this.placingOrder = false
+        } catch (error) {
+          this.$toast.error('Có lỗi xảy ra khi đặt hàng!');
+        } finally {
+          this.placingOrder = false;
+        }
       }
     }
   }
@@ -265,19 +313,19 @@ export default {
 }
 
 .card-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #000000 0%, #000000 100%);
   color: white;
   border-radius: 10px 10px 0 0 !important;
 }
 
 .btn-success {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: linear-gradient(135deg, #000000 0%, #000000 100%);
   border: none;
   transition: all 0.3s ease;
 }
 
 .btn-success:hover {
-  background: linear-gradient(135deg, #000000 0%, #1aa085 100%);
+  background: linear-gradient(135deg, #000000 0%, #000000 100%);
   transform: translateY(-2px);
 }
 

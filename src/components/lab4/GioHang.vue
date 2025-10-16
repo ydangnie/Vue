@@ -3,7 +3,7 @@ import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'GioHang',
-  // mounted() hook đã được xóa bỏ vì không cần thiết
+ 
   computed: {
     ...mapState(['cart']),
     ...mapGetters(['cartTotal', 'cartItemCount'])

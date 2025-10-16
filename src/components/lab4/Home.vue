@@ -7,7 +7,7 @@
           <div class="col-lg-6">
             <h3 class="display-4 fw-bold mb-4">
               <span>AZALMAN STORE</span> <br><span id="chao"></span></h3>
-            <p class="lead mb-4">Khám phá bộ sưu tập sản phẩm chất lượng cao với giá cả phải chăng</p>
+            <p class="lead mb-4">Khám phá ngay bộ sưu tập sản phẩm chất lượng cao</p>
             <router-link to="/san-pham" class="btn btn-light btn-lg">
               <i class="fas fa-shopping-bag"></i> Mua sắm ngay
             </router-link>

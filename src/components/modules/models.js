@@ -1,6 +1,6 @@
 import { VNPay, ignoreLogger } from 'vnpay';
 
-const vnpay = new VNPay({
+export const vnpay = new VNPay({ // <--- Thêm "export" ở đây
     // ⚡ Cấu hình bắt buộc
     tmnCode: '1X69NBBF',
     secureSecret: 'OFVWVEJGU4051E7V1DCZTQCJ11DK4D4A',
