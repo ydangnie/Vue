@@ -1,7 +1,6 @@
 <script>
-// Phần <script> giữ nguyên không thay đổi
 import Toast from './components/lab4/Toast.vue';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'App',
@@ -27,11 +26,13 @@ export default {
     this.checkAuthStatus();
     window.addEventListener('storage', this.checkAuthStatus);
     this.$store.dispatch('loadCart');
+    this.$store.dispatch('loadWishlist'); // Tải wishlist
   },
   beforeUnmount() {
     window.removeEventListener('storage', this.checkAuthStatus);
   },
   methods: {
+    ...mapActions(['logout']), // Sử dụng mapActions cho logout
     checkAuthStatus() {
       const user = localStorage.getItem('user');
       if (user) {
@@ -44,9 +45,8 @@ export default {
         this.currentUser = null;
       }
     },
-    logout() {
-      localStorage.removeItem('user');
-      this.currentUser = null;
+    confirmLogout() { // Đổi tên hàm để tránh trùng với action
+      this.logout(); // Gọi action logout từ Vuex
       this.showToast('success', 'Đăng xuất thành công', 'Bạn đã đăng xuất khỏi tài khoản.');
       this.$router.push('/');
     },
@@ -97,9 +97,12 @@ export default {
                     </div>
 
                     <div class="navbar-nav align-items-center">
-                        <router-link v-if="isLoggedIn" to="/gio-hang" class="nav-link cart-icon">
+                        <router-link v-if="isLoggedIn" to="/gio-hang" class="nav-link cart-icon position-relative">
                             <i class="fas fa-shopping-cart me-1"></i>
-                            <span v-if="cartItemCount > 0" class="badge rounded-pill bg-danger cart-badge">{{ cartItemCount }}</span>
+                            <span v-if="cartItemCount > 0" class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle" style="font-size: 0.6em;">{{ cartItemCount }}</span>
+                        </router-link>
+                        <router-link v-if="isLoggedIn" to="/yeu-thich" class="nav-link cart-icon ms-2">
+                             <i class="fas fa-heart"></i>
                         </router-link>
                         <div v-if="!isLoggedIn" class="d-flex">
                             <router-link to="/login" class="btn btn-outline-light btn-sm me-2">Đăng nhập</router-link>
@@ -114,8 +117,9 @@ export default {
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><router-link to="/cap-nhat-user" class="dropdown-item">Hồ sơ của tôi</router-link></li>
+                                <li><router-link to="/yeu-thich" class="dropdown-item">Sản phẩm yêu thích</router-link></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a @click="logout" class="dropdown-item text-danger" style="cursor: pointer;">
+                                <li><a @click="confirmLogout" class="dropdown-item text-danger" style="cursor: pointer;">
                                     <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
                                 </a></li>
                             </ul>
@@ -145,52 +149,14 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  font-weight: bold;
 }
-
-.user-info {
-  line-height: 1.2;
-}
-
-.username {
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 2px;
-}
-
-.role-badge {
-  font-size: 0.75rem;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-weight: 500;
-}
-
-.role-badge.admin {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-  color: white;
-}
-
-.role-badge.user {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
-}
-
 .dropdown-toggle::after {
   margin-left: 0.5rem;
-}
-
-@media (max-width: 767.98px) {
-  .user-info {
-    display: none !important;
-  }
-
-  .user-avatar {
-    width: 35px;
-    height: 35px;
-  }
 }
 </style>

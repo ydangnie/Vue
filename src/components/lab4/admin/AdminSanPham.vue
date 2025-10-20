@@ -6,7 +6,14 @@
         <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
       </router-link>
     </div>
+    
     <button @click="showAddForm = true" class="btn btn-primary mb-3">Thêm sản phẩm</button>
+
+    <div class="alert alert-info d-flex align-items-center mb-3">
+      <label for="lowStockThreshold" class="form-label mb-0 me-2 fw-bold">Ngưỡng cảnh báo hết hàng:</label>
+      <input type="number" id="lowStockThreshold" v-model.number="lowStockThreshold" class="form-control" style="width: 100px;">
+      <small class="ms-2 text-muted">Sản phẩm có số lượng bằng hoặc thấp hơn ngưỡng này sẽ được tô vàng.</small>
+    </div>
 
     <div v-if="showAddForm" class="modal">
       <div class="modal-content">
@@ -58,9 +65,9 @@
         </form>
       </div>
     </div>
-
-    <table class="table table-striped">
-      <thead>
+    
+    <table class="table table-striped table-hover">
+      <thead class="table-dark">
         <tr>
           <th>ID</th>
           <th>Images</th>
@@ -74,18 +81,19 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="sanPham in danhSachSanPham" :key="sanPham.id">
+        <tr v-for="sanPham in danhSachSanPham" :key="sanPham.id" :class="{'table-warning': sanPham.quantity <= lowStockThreshold && sanPham.quantity > 0}">
           <td>{{ sanPham.id }}</td>
           <td>
-            <div class="image-preview">
-              <img v-if="sanPham.images && sanPham.images.length > 0" :src="sanPham.images[0]" alt="Product Image" style="max-width: 50px; margin: 2px;">
-              <span v-else class="text-muted">No image</span>
-            </div>
+            <img v-if="sanPham.images && sanPham.images.length > 0" :src="sanPham.images[0]" alt="Product Image" style="width: 50px; height: 50px; object-fit: cover;">
           </td>
           <td>{{ sanPham.title }}</td>
           <td>${{ sanPham.price }}</td>
           <td>{{ sanPham.category }}</td>
-          <td>{{ sanPham.quantity }}</td>
+          <td>
+            {{ sanPham.quantity }}
+            <span v-if="sanPham.quantity <= lowStockThreshold && sanPham.quantity > 0" class="badge bg-warning text-dark ms-2">Sắp hết</span>
+            <span v-if="sanPham.quantity === 0" class="badge bg-danger ms-2">Hết hàng</span>
+          </td>
           <td>{{ sanPham.discount }}%</td>
           <td>
             <span v-if="sanPham.featured" class="badge bg-success">Yes</span>
@@ -114,6 +122,7 @@ export default {
       editingProduct: null,
       nextId: 1,
       imageError: '',
+      lowStockThreshold: 10, // Ngưỡng mặc định
       productForm: {
         title: '',
         price: 0,
@@ -150,7 +159,6 @@ export default {
           this.danhSachSanPham = response.data;
         })
         .catch(error => {
-          console.error('Lỗi:', error);
           this.$toast.error('Lỗi tải dữ liệu', 'Không thể tải danh sách sản phẩm!');
         });
     },
@@ -160,74 +168,43 @@ export default {
           this.categories = response.data;
         })
         .catch(error => {
-          console.error('Lỗi:', error);
           this.$toast.error('Lỗi tải danh mục', 'Không thể tải danh sách danh mục!');
         });
     },
     handleImageUpload(event) {
       const files = Array.from(event.target.files);
-      const maxImages = 5;
-      const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
-
-      this.imageError = '';
-
-      if (this.productForm.images.length + files.length > maxImages) {
-        this.imageError = `Bạn chỉ có thể tải lên tối đa ${maxImages} hình ảnh.`;
+      if (this.productForm.images.length + files.length > 5) {
+        this.imageError = `Bạn chỉ có thể tải lên tối đa 5 hình ảnh.`;
         return;
       }
-
       files.forEach(file => {
-        if (!validTypes.includes(file.type)) {
-          this.imageError = 'Chỉ chấp nhận các định dạng JPEG, PNG hoặc GIF.';
-          return;
-        }
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            this.productForm.images.push(e.target.result);
-          };
-          reader.readAsDataURL(file);
-        }
+        const reader = new FileReader();
+        reader.onload = (e) => this.productForm.images.push(e.target.result);
+        reader.readAsDataURL(file);
       });
     },
     clearImages() {
       this.productForm.images = [];
-      this.imageError = '';
     },
     async saveProduct() {
-      const productData = {
-        ...this.productForm,
-        id: this.editingProduct ? this.editingProduct.id : this.nextId
-      };
-
+      const productData = { ...this.productForm, id: this.editingProduct ? this.editingProduct.id : this.nextId.toString() };
       try {
         if (this.editingProduct) {
           await axios.put(`/products/${this.editingProduct.id}`, productData);
-          this.$toast.success('Cập nhật thành công', `Sản phẩm "${this.productForm.title}" đã được cập nhật!`);
+          this.$toast.success('Cập nhật thành công!');
         } else {
           await axios.post('/products', productData);
-          this.nextId++;
-          this.$toast.success('Thêm sản phẩm thành công', `Sản phẩm "${this.productForm.title}" đã được thêm!`);
+          this.$toast.success('Thêm sản phẩm thành công!');
         }
         this.layDuLieuSanPham();
         this.resetForm();
       } catch (error) {
-        console.error('Lỗi:', error);
-        this.$toast.error('Lỗi lưu sản phẩm', 'Có lỗi xảy ra khi lưu sản phẩm!');
+        this.$toast.error('Lỗi lưu sản phẩm!');
       }
     },
     editProduct(product) {
       this.editingProduct = product;
-      this.productForm = {
-        title: product.title || '',
-        price: product.price || 0,
-        category: product.category || '',
-        description: product.description || '',
-        quantity: product.quantity || 0,
-        discount: product.discount || 0,
-        images: Array.isArray(product.images) ? [...product.images] : [],
-        featured: product.featured || false
-      };
+      this.productForm = { ...product, images: Array.isArray(product.images) ? [...product.images] : [] };
       this.showAddForm = true;
     },
     xoaSanPham(id) {
@@ -235,25 +212,13 @@ export default {
         axios.delete(`/products/${id}`)
           .then(() => {
             this.layDuLieuSanPham();
-            this.$toast.success('Xóa sản phẩm thành công', 'Sản phẩm đã được xóa khỏi hệ thống!');
+            this.$toast.success('Xóa sản phẩm thành công!');
           })
-          .catch(error => {
-            console.error('Lỗi:', error);
-            this.$toast.error('Xóa sản phẩm thất bại', 'Có lỗi xảy ra khi xóa sản phẩm!');
-          });
+          .catch(() => this.$toast.error('Xóa sản phẩm thất bại!'));
       }
     },
     resetForm() {
-      this.productForm = {
-        title: '',
-        price: 0,
-        category: '',
-        description: '',
-        quantity: 0,
-        discount: 0,
-        images: [],
-        featured: false
-      };
+      this.productForm = { title: '', price: 0, category: '', description: '', quantity: 0, discount: 0, images: [], featured: false };
       this.editingProduct = null;
       this.showAddForm = false;
       this.imageError = '';
@@ -261,58 +226,10 @@ export default {
   },
 };
 </script>
+
 <style scoped>
-.modal {
-  display: block;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgb(0,0,0);
-  background-color: rgba(0,0,0,0.4);
-}
-
-.modal-content {
-  background-color: #fefefe;
-  margin: 15% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-}
-
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.text-danger {
-  font-size: 0.875rem;
-  margin-top: 5px;
-}
-
-.image-preview img {
-  max-height: 50px;
-  margin-right: 5px;
-}
-
-.text-muted {
-  font-size: 0.875rem;
-  color: #6c757d;
-}
+.modal { display: block; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+.modal-content { background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 700px; }
+.close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+.form-group { margin-bottom: 15px; }
 </style>

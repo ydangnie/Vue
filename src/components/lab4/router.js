@@ -1,3 +1,4 @@
+// src/components/lab4/router.js
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from './Home.vue';
 import SanPham from './SanPham.vue';
@@ -17,31 +18,34 @@ import Logout from './login/logout.vue';
 import UserAdmin from './user/UserAdmin.vue';
 import CapNhatUser from './user/CapNhatUser.vue';
 import LichSuDonHang from './user/LichSuDonHang.vue';
-import VnPayReturn from './VnPayReturn.vue'; // Thêm import này
+import YeuThich from './user/YeuThich.vue';
+import VnPayReturn from './VnPayReturn.vue';
 
-const routes = [{
-        path: '/vnpay_return',
-        component: VnPayReturn,
-        name: 'VnPayReturn'
-    },
+const routes = [
     { path: '/', component: Home, name: 'Home' },
+    { path: '/vnpay_return', component: VnPayReturn, name: 'VnPayReturn' },
     { path: '/san-pham', component: SanPham, name: 'SanPham' },
     { path: '/chi-tiet-san-pham/:id', component: ChiTietSanPham, name: 'ChiTietSanPham' },
     { path: '/gio-hang', component: GioHang, name: 'GioHang' },
-    { path: '/thanh-toan', component: ThanhToan, name: 'ThanhToan' },
-    { path: '/don-hang-thanh-cong/:orderId', component: DonHangThanhCong, name: 'DonHangThanhCong' },
-    { path: '/admin/san-pham', component: AdminSanPham, name: 'AdminSanPham' },
-    { path: '/admin/category', component: AdminCategory, name: 'AdminCategory' },
-    { path: '/admin/quan-ly-danh-muc', component: QuanLyDanhMuc, name: 'QuanLyDanhMuc' },
-    { path: '/admin/users', component: AdminQuanLyUsers, name: 'AdminQuanLyUsers' },
-    { path: '/admin/orders', component: AdminQuanLyDonHang, name: 'AdminQuanLyDonHang' },
-    { path: '/admin/reports', component: BaoCaoThongKe, name: 'BaoCaoThongKe' },
+    { path: '/thanh-toan', component: ThanhToan, name: 'ThanhToan', meta: { requiresAuth: true } },
+    { path: '/don-hang-thanh-cong/:orderId', component: DonHangThanhCong, name: 'DonHangThanhCong', meta: { requiresAuth: true } },
     { path: '/login', component: Login, name: 'Login' },
     { path: '/dangky', component: DangKy, name: 'DangKy' },
-    { path: '/logout', component: Logout, name: 'Logout' },
-    { path: '/user/admin', component: UserAdmin, name: 'UserAdmin' },
-    { path: '/cap-nhat-user', component: CapNhatUser, name: 'CapNhatUser' },
-    { path: '/lich-su-don-hang', component: LichSuDonHang, name: 'LichSuDonHang' },
+    { path: '/logout', component: Logout, name: 'Logout', meta: { requiresAuth: true } },
+
+    // User routes
+    { path: '/cap-nhat-user', component: CapNhatUser, name: 'CapNhatUser', meta: { requiresAuth: true } },
+    { path: '/lich-su-don-hang', component: LichSuDonHang, name: 'LichSuDonHang', meta: { requiresAuth: true } },
+    { path: '/yeu-thich', component: YeuThich, name: 'YeuThich', meta: { requiresAuth: true } },
+
+    // Admin routes
+    { path: '/admin/san-pham', component: AdminSanPham, name: 'AdminSanPham', meta: { requiresAdmin: true } },
+    { path: '/admin/category', component: AdminCategory, name: 'AdminCategory', meta: { requiresAdmin: true } },
+    { path: '/admin/quan-ly-danh-muc', component: QuanLyDanhMuc, name: 'QuanLyDanhMuc', meta: { requiresAdmin: true } },
+    { path: '/admin/users', component: AdminQuanLyUsers, name: 'AdminQuanLyUsers', meta: { requiresAdmin: true } },
+    { path: '/admin/orders', component: AdminQuanLyDonHang, name: 'AdminQuanLyDonHang', meta: { requiresAdmin: true } },
+    { path: '/admin/reports', component: BaoCaoThongKe, name: 'BaoCaoThongKe', meta: { requiresAdmin: true } },
+    { path: '/user/admin', component: UserAdmin, name: 'UserAdmin', meta: { requiresAdmin: true } },
 ];
 
 const router = createRouter({
@@ -51,24 +55,17 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     const user = JSON.parse(localStorage.getItem('user'));
-    if (to.path.startsWith('/admin') || to.path.startsWith('/user')) {
+
+    if (to.meta.requiresAdmin) {
         if (!user || user.role !== 'admin') {
             alert('Bạn cần đăng nhập với quyền admin!');
             next('/login');
         } else {
             next();
         }
-    } else if (to.path === '/logout') {
-        // Allow access to logout page if logged in
+    } else if (to.meta.requiresAuth) {
         if (!user) {
-            next('/login');
-        } else {
-            next();
-        }
-    } else if (to.path === '/thanh-toan') {
-        // Require login for checkout
-        if (!user) {
-            alert('Bạn cần đăng nhập để thanh toán!');
+            alert('Bạn cần đăng nhập để truy cập trang này!');
             next('/login');
         } else {
             next();

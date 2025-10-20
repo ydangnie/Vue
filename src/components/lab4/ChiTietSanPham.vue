@@ -69,31 +69,71 @@
                 <span v-if="addingToCart" class="spinner-border spinner-border-sm me-2" role="status"></span>
                 <i class="fas fa-cart-plus"></i> {{ addingToCart ? 'Đang thêm...' : (sanPham.quantity <= 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng') }}
               </button>
-              <button class="btn btn-outline-secondary btn-lg">
-                <i class="fas fa-heart"></i> Yêu thích
+              <button @click="toggleWishlistHandler" :class="['btn btn-lg', isProductInWishlist ? 'btn-danger' : 'btn-outline-danger']" :disabled="!isLoggedIn">
+                <i :class="['fas fa-heart me-2', isProductInWishlist ? 'text-white' : '']"></i> 
+                {{ isProductInWishlist ? 'Đã yêu thích' : 'Yêu thích' }}
               </button>
             </div>
           </div>
         </div>
       </div>
+      
+      <div class="product-reviews mt-5 card">
+        <div class="card-header">
+            <h3 class="mb-0">Đánh giá sản phẩm</h3>
+        </div>
+        <div class="card-body">
+            <div class="mb-4" v-if="isLoggedIn">
+                <h5 class="card-title">Viết đánh giá của bạn</h5>
+                <form @submit.prevent="submitReview">
+                <div class="mb-3">
+                    <label class="form-label">Xếp hạng</label>
+                    <div>
+                    <i v-for="n in 5" :key="n" 
+                        :class="['fas fa-star', n <= newReview.rating ? 'text-warning' : 'text-muted']"
+                        @click="newReview.rating = n"
+                        style="cursor: pointer; font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="reviewComment" class="form-label">Bình luận</label>
+                    <textarea v-model="newReview.comment" id="reviewComment" class="form-control" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+                </form>
+            </div>
+            <div v-else class="alert alert-info">
+                Vui lòng <router-link to="/login">đăng nhập</router-link> để viết đánh giá.
+            </div>
 
-      <SanPhamLienQuan
-        :current-product-id="sanPham.id"
-        :category="sanPham.category"
-      />
-
-      <div class="text-center mt-5">
-        <router-link to="/san-pham" class="btn btn-outline-primary">
-          <i class="fas fa-arrow-left"></i> Quay lại danh sách sản phẩm
-        </router-link>
+            <hr v-if="isLoggedIn">
+            <div v-if="sanPham.reviews && sanPham.reviews.length > 0">
+                <div v-for="(review, index) in sanPham.reviews.slice().reverse()" :key="index" class="review-item border-bottom pb-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong><i class="fas fa-user me-2"></i>{{ review.author }}</strong>
+                        <div class="rating">
+                        <i v-for="n in 5" :key="n" :class="['fas fa-star', n <= review.rating ? 'text-warning' : 'text-muted']"></i>
+                        </div>
+                    </div>
+                    <p class="mb-1 mt-2">{{ review.comment }}</p>
+                    <small class="text-muted">{{ new Date(review.date).toLocaleString('vi-VN') }}</small>
+                </div>
+            </div>
+            <div v-else class="text-center py-4">
+                <p class="text-muted">Chưa có đánh giá nào cho sản phẩm này.</p>
+            </div>
+        </div>
       </div>
+
+      <SanPhamLienQuan :current-product-id="sanPham.id" :category="sanPham.category" />
+
     </div>
   </div>
 </template>
 
 <script>
 import axios from '../../../axios.js';
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import SanPhamLienQuan from './SanPhamLienQuan.vue';
 
 export default {
@@ -106,123 +146,139 @@ export default {
       sanPham: {},
       selectedImage: '',
       addingToCart: false,
-      quantityToAdd: 1, // ADD: Dữ liệu cho số lượng
+      quantityToAdd: 1,
+      newReview: {
+        rating: 5,
+        comment: ''
+      }
     };
+  },
+  computed: {
+    ...mapGetters(['isInWishlist']),
+    ...mapState(['user']),
+    isLoggedIn() {
+      return !!this.user;
+    },
+    isProductInWishlist() {
+        return this.isInWishlist(this.sanPham.id);
+    }
   },
   mounted() {
     this.layChiTietSanPham();
   },
   methods: {
     ...mapActions({
-      addToCartAction: 'addToCart'
+      addToCartAction: 'addToCart',
+      toggleWishlist: 'toggleWishlist'
     }),
     layChiTietSanPham() {
       const id = this.$route.params.id;
       axios.get(`/products/${id}`)
         .then(response => {
           this.sanPham = response.data;
-          if (this.sanPham.images && this.sanPham.images.length > 0) {
-            this.selectedImage = this.sanPham.images[0];
-          } else {
-            this.selectedImage = 'https://via.placeholder.com/400x400?text=No+Image';
-          }
+          this.selectedImage = (this.sanPham.images && this.sanPham.images.length > 0) ? this.sanPham.images[0] : 'https://via.placeholder.com/400x400?text=No+Image';
         })
-        .catch(error => {
-          console.error('Lỗi:', error);
-        });
+        .catch(error => console.error('Lỗi:', error));
     },
-    // ADD: Hàm tăng số lượng
     increaseQuantity() {
-        if (this.quantityToAdd < this.sanPham.quantity) {
-            this.quantityToAdd++;
-        }
+        if (this.quantityToAdd < this.sanPham.quantity) this.quantityToAdd++;
     },
-    // ADD: Hàm giảm số lượng
     decreaseQuantity() {
-        if (this.quantityToAdd > 1) {
-            this.quantityToAdd--;
-        }
+        if (this.quantityToAdd > 1) this.quantityToAdd--;
     },
-    // FIX: Cập nhật hàm addToCart
     async addToCart() {
       if (this.addingToCart || this.sanPham.quantity <= 0) return;
-
       this.addingToCart = true;
       try {
-        const productWithStock = {
-          ...this.sanPham,
-          stock: this.sanPham.quantity 
-        };
-        await this.addToCartAction({ product: productWithStock, quantity: this.quantityToAdd });
+        await this.addToCartAction({ product: { ...this.sanPham, stock: this.sanPham.quantity }, quantity: this.quantityToAdd });
         this.$toast.success('Thành công!', `${this.quantityToAdd} sản phẩm đã được thêm vào giỏ.`);
       } catch (error) {
-        console.error('Lỗi khi thêm vào giỏ hàng:', error);
         this.$toast.error('Thêm thất bại!', error.message || 'Có lỗi xảy ra.');
       } finally {
         this.addingToCart = false;
       }
+    },
+    toggleWishlistHandler() {
+        if(!this.isLoggedIn) {
+            this.$toast.warning("Vui lòng đăng nhập để sử dụng chức năng này!");
+            return;
+        }
+        this.toggleWishlist(this.sanPham);
+        if (this.isProductInWishlist) {
+            this.$toast.info("Đã bỏ sản phẩm khỏi danh sách yêu thích.");
+        } else {
+            this.$toast.success("Đã thêm sản phẩm vào danh sách yêu thích!");
+        }
+    },
+    async submitReview() {
+      if (!this.newReview.comment.trim()) {
+        this.$toast.error('Vui lòng nhập bình luận!');
+        return;
+      }
+      
+      const reviewData = {
+        author: this.user.username,
+        rating: this.newReview.rating,
+        comment: this.newReview.comment,
+        date: new Date().toISOString()
+      };
+
+      const updatedReviews = this.sanPham.reviews ? [...this.sanPham.reviews, reviewData] : [reviewData];
+
+      try {
+        await axios.patch(`/products/${this.sanPham.id}`, { reviews: updatedReviews });
+        this.sanPham.reviews = updatedReviews;
+        this.newReview.rating = 5;
+        this.newReview.comment = '';
+        this.$toast.success('Gửi đánh giá thành công!');
+      } catch (error) {
+        this.$toast.error('Có lỗi xảy ra khi gửi đánh giá.');
+        console.error("Lỗi review:", error);
+      }
     }
   },
-   watch: {
+  watch: {
     '$route.params.id'() {
       this.layChiTietSanPham();
-      this.quantityToAdd = 1; // Reset số lượng về 1 khi chuyển trang
+      this.quantityToAdd = 1;
     },
-    // ADD: Theo dõi để số lượng không vượt quá tồn kho
     quantityToAdd(newValue) {
-        if (newValue > this.sanPham.quantity) {
-            this.quantityToAdd = this.sanPham.quantity;
-        }
-        if (newValue < 1) {
-            this.quantityToAdd = 1;
-        }
+        if (newValue > this.sanPham.quantity) this.quantityToAdd = this.sanPham.quantity;
+        if (newValue < 1) this.quantityToAdd = 1;
     }
   }
 };
 </script>
 
 <style scoped>
-/* CSS giữ nguyên, thêm style cho bộ điều khiển số lượng */
-.quantity-controls {
-  max-width: 150px;
-}
-.quantity-input {
-  text-align: center;
-  font-weight: bold;
-}
-/* Loại bỏ mũi tên tăng giảm mặc định của trình duyệt */
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
-}
-input[type=number] {
-  -moz-appearance: textfield;
+.quantity-controls { max-width: 150px; }
+.quantity-input { text-align: center; }
+.product-reviews {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 .chi-tiet-san-pham {
   background-color: #f8f9fa;
   min-height: 100vh;
   padding: 20px 0;
 }
-
 .product-images {
   background: white;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
-
 .main-image img {
   width: 100%;
   height: 400px;
   object-fit: cover;
   border-radius: 8px;
 }
-
 .thumbnail-images {
   justify-content: center;
 }
-
 .thumbnail-img {
   width: 80px;
   height: 80px;
@@ -232,114 +288,23 @@ input[type=number] {
   border: 2px solid transparent;
   transition: all 0.3s ease;
 }
-
 .thumbnail-img:hover {
   border-color: #007bff;
   transform: scale(1.05);
 }
-
 .thumbnail-img.active {
   border-color: #007bff;
   box-shadow: 0 0 10px rgba(0,123,255,0.3);
 }
-
 .product-info {
   background: white;
   padding: 30px;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
-
 .product-title {
   color: #333;
   font-weight: 700;
   margin-bottom: 1rem;
-}
-
-.price-section {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
-}
-
-.original-price {
-  text-decoration: line-through;
-  color: #6c757d;
-  margin: 0;
-}
-
-.final-price {
-  color: #dc3545;
-  font-weight: 700;
-  margin: 0;
-}
-
-.discount-badge {
-  background: #dc3545;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.product-meta p {
-  margin-bottom: 0.5rem;
-  font-size: 1rem;
-}
-
-.product-description {
-  border-top: 1px solid #e9ecef;
-  padding-top: 1.5rem;
-}
-
-.product-description h5 {
-  color: #495057;
-  margin-bottom: 1rem;
-}
-
-.product-description p {
-  color: #6c757d;
-  line-height: 1.6;
-}
-
-.action-buttons {
-  margin-top: 2rem;
-}
-
-.btn {
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #747578 0%, #000000 100%);
-  border: none;
-}
-
-.btn-primary:hover {
-  background: linear-gradient(135deg, #747578 0%, #000000 100%);
-  transform: translateY(-2px);
-}
-
-.btn-outline-secondary:hover {
-  transform: translateY(-2px);
-}
-
-.breadcrumb {
-  background: transparent;
-  padding: 0;
-  margin-bottom: 2rem;
-}
-
-.breadcrumb-item a {
-  color: #007bff;
-  text-decoration: none;
-}
-
-.breadcrumb-item.active {
-  color: #6c757d;
 }
 </style>

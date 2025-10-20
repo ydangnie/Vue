@@ -9,7 +9,36 @@ export default {
     ...mapGetters(['cartTotal', 'cartItemCount'])
   },
   methods: {
-    ...mapActions(['removeFromCart', 'updateCartItemQuantity', 'clearCart']),
+    ...mapActions({
+      removeFromCartAction: 'removeFromCart', 
+      updateCartItemQuantity: 'updateCartItemQuantity',
+      clearCartAction: 'clearCart' 
+    }),
+
+  
+
+    async removeFromCart(productId) {
+      const item = this.cart.find(item => item.id === productId);
+      if (item) {
+        // Gọi action gốc để xóa sản phẩm
+        await this.removeFromCartAction(productId);
+        // Hiển thị thông báo thành công
+        this.$toast.success('Đã xóa!', `Đã xóa "${item.title}" khỏi giỏ hàng.`);
+      }
+    },
+
+    
+    async clearCart() {
+      if (confirm('Bạn có chắc chắn muốn xóa tất cả sản phẩm khỏi giỏ hàng?')) {
+        // Gọi action gốc để xóa giỏ hàng
+        await this.clearCartAction();
+        // Hiển thị thông báo
+        this.$toast.info('Thông báo', 'Giỏ hàng của bạn đã được dọn sạch.');
+      }
+    },
+
+    // --- KẾT THÚC THAY ĐỔI ---
+
     increaseQuantity(productId) {
       const item = this.cart.find(item => item.id === productId);
       if (item && item.quantity < item.stock) {
@@ -35,7 +64,7 @@ export default {
           this.updateCartItemQuantity({ productId, quantity: item.stock });
           this.$toast.error('Không thể vượt quá số lượng tồn kho!');
       } else {
-        this.removeFromCart(productId);
+        this.removeFromCart(productId); // Gọi phương thức đã ghi đè
       }
     },
   }

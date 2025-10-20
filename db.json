@@ -116,9 +116,10 @@
       "id": "1760340214857",
       "username": "abc1234",
       "email": "abc@gmail.com",
-      "password": "abc1234",
-      "role": "user",
-      "age": 19
+      "role": "admin",
+      "age": 19,
+      "gender": "male",
+      "desiredProducts": "sds"
     },
     {
       "id": "1760443508831",
@@ -330,10 +331,6 @@
     {
       "id": "4",
       "name": "Sports"
-    },
-    {
-      "id": "5",
-      "name": "Dien thoai"
     }
   ],
   "orders": [
@@ -390,7 +387,7 @@
       "promoDiscount": 0,
       "paymentMethod": "cod",
       "notes": "cẩn trhaanj",
-      "status": "pending",
+      "status": "delivered",
       "createdAt": "2025-10-15T02:37:28.733Z"
     },
     {
@@ -438,7 +435,7 @@
       "promoDiscount": 0,
       "paymentMethod": "cod",
       "notes": "Cẩn thận",
-      "status": "pending",
+      "status": "delivered",
       "createdAt": "2025-10-15T03:45:07.172Z"
     },
     {
@@ -641,6 +638,136 @@
       "notes": "cdscs",
       "status": "delivered",
       "createdAt": "2025-10-15T08:32:03.507Z"
+    },
+    {
+      "id": "f8d0",
+      "customer": {
+        "name": "admin",
+        "email": "admin@gmail.com",
+        "phone": "0987654332",
+        "address": "dsdsnjdjsnjd"
+      },
+      "items": [
+        {
+          "id": "1759891048307",
+          "title": "Áo",
+          "price": 50,
+          "category": "Sports",
+          "description": "diksdnfjusndoufsd",
+          "quantity": 2,
+          "discount": 1,
+          "images": [
+            "https://picsum.photos/seed/placeholder/400/400"
+          ],
+          "featured": false,
+          "stock": 9
+        },
+        {
+          "id": "2",
+          "title": "Smart LED Lamp",
+          "price": 29.5,
+          "category": "Home",
+          "images": [
+            "https://picsum.photos/seed/lamp/400/400",
+            "https://picsum.photos/seed/smartlight/400/400"
+          ],
+          "description": "Warm-to-cool light, app & voice control. Energy efficient LED with smart home integration.",
+          "quantity": 1,
+          "discount": 10,
+          "featured": true,
+          "stock": 5
+        }
+      ],
+      "total": 125.55,
+      "originalTotal": 125.55,
+      "promoCode": null,
+      "promoDiscount": 0,
+      "paymentMethod": "cod",
+      "notes": "dsjjdsj",
+      "status": "delivered",
+      "createdAt": "2025-10-17T08:40:02.710Z"
+    },
+    {
+      "id": "10dc",
+      "customer": {
+        "name": "abc1234",
+        "email": "abc@gmail.com",
+        "phone": "098765432",
+        "address": "dsdsvdsvs"
+      },
+      "items": [
+        {
+          "title": "Aó",
+          "price": 100,
+          "category": "Fashion",
+          "description": "hjauodhfuohsdufhusdfs",
+          "quantity": 1,
+          "discount": 0,
+          "images": [
+            "https://picsum.photos/seed/placeholder/400/400",
+            "https://picsum.photos/seed/placeholder/400/400",
+            "https://picsum.photos/seed/placeholder/400/400"
+          ],
+          "featured": true,
+          "id": "1759891501439",
+          "stock": 80
+        },
+        {
+          "id": "1759891048307",
+          "title": "Áo",
+          "price": 50,
+          "category": "Sports",
+          "description": "diksdnfjusndoufsd",
+          "quantity": 1,
+          "discount": 1,
+          "images": [
+            "https://picsum.photos/seed/placeholder/400/400"
+          ],
+          "featured": false,
+          "stock": 9
+        }
+      ],
+      "total": 149.5,
+      "originalTotal": 149.5,
+      "promoCode": null,
+      "promoDiscount": 0,
+      "paymentMethod": "cod",
+      "notes": "dvsdvsdvsdvsd",
+      "status": "delivered",
+      "createdAt": "2025-10-17T08:42:25.632Z"
+    },
+    {
+      "id": "9626",
+      "customer": {
+        "name": "abc1234",
+        "email": "abc@gmail.com",
+        "phone": "0987654332",
+        "address": "sdsds"
+      },
+      "items": [
+        {
+          "id": "1759891048307",
+          "title": "Áo",
+          "price": 50,
+          "category": "Sports",
+          "description": "diksdnfjusndoufsd",
+          "quantity": 3,
+          "discount": 1,
+          "images": [
+            "https://picsum.photos/seed/placeholder/400/400"
+          ],
+          "featured": false,
+          "stock": 9
+        }
+      ],
+      "total": 148.5,
+      "originalTotal": 148.5,
+      "promoCode": null,
+      "promoDiscount": 0,
+      "paymentMethod": "cod",
+      "notes": "dsdsdv",
+      "status": "processing",
+      "createdAt": "2025-10-17T09:06:41.787Z"
     }
   ],
   "cart": [

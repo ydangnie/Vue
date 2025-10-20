@@ -1,7 +1,8 @@
+// src/components/store.js
 import { createStore } from 'vuex'
 import axios from '../../axios.js'
 
-// Hàm trợ giúp localStorage
+// Hàm trợ giúp localStorage cho Cart
 const loadCartFromLocalStorage = () => {
     try {
         const cart = localStorage.getItem('cart');
@@ -15,11 +16,26 @@ const saveCartToLocalStorage = (cart) => {
     } catch (error) { console.error('Lỗi khi lưu giỏ hàng:', error); }
 };
 
+// Hàm trợ giúp localStorage cho Wishlist
+const loadWishlistFromLocalStorage = () => {
+    try {
+        const wishlist = localStorage.getItem('wishlist');
+        return wishlist ? JSON.parse(wishlist) : [];
+    } catch (e) { console.error('Lỗi tải wishlist:', e); return []; }
+};
+
+const saveWishlistToLocalStorage = (wishlist) => {
+    try {
+        localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    } catch (e) { console.error('Lỗi lưu wishlist:', e); }
+};
+
 const store = createStore({
     state() {
         return {
             cart: loadCartFromLocalStorage(),
-            user: JSON.parse(localStorage.getItem('user') || 'null')
+            user: JSON.parse(localStorage.getItem('user') || 'null'),
+            wishlist: loadWishlistFromLocalStorage() // Thêm wishlist state
         }
     },
     mutations: {
@@ -52,7 +68,7 @@ const store = createStore({
         },
         CLEAR_CART(state) {
             state.cart = [];
-            localStorage.removeItem('cart'); // Xóa khỏi localStorage
+            localStorage.removeItem('cart');
         },
         SET_CART(state, cart) {
             state.cart = cart;
@@ -65,9 +81,25 @@ const store = createStore({
             if (user) {
                 localStorage.setItem('user', JSON.stringify(user));
             } else {
-                localStorage.removeItem('user'); // Xóa khỏi localStorage
+                localStorage.removeItem('user');
             }
         },
+
+        // --- Mutations cho wishlist ---
+        ADD_TO_WISHLIST(state, product) {
+            if (!state.wishlist.find(item => item.id === product.id)) {
+                state.wishlist.push(product);
+                saveWishlistToLocalStorage(state.wishlist);
+            }
+        },
+        REMOVE_FROM_WISHLIST(state, productId) {
+            state.wishlist = state.wishlist.filter(item => item.id !== productId);
+            saveWishlistToLocalStorage(state.wishlist);
+        },
+        SET_WISHLIST(state, wishlist) {
+            state.wishlist = wishlist;
+            saveWishlistToLocalStorage(state.wishlist);
+        }
     },
     actions: {
         // --- Actions cho giỏ hàng ---
@@ -99,17 +131,40 @@ const store = createStore({
         setUser({ commit }, user) {
             commit('SET_USER', user);
         },
-        // FIX: Action logout sẽ xóa cả user và cart
         logout({ commit }) {
             commit('SET_USER', null);
             commit('CLEAR_CART');
-        }
+            commit('SET_WISHLIST', []); // Xóa wishlist khi logout
+        },
+
+        // --- Actions cho wishlist ---
+        toggleWishlist({ commit, state }, product) {
+            const isInWishlist = state.wishlist.some(item => item.id === product.id);
+            if (isInWishlist) {
+                commit('REMOVE_FROM_WISHLIST', product.id);
+            } else {
+                commit('ADD_TO_WISHLIST', product);
+            }
+        },
+        loadWishlist({ commit }) {
+            const wishlist = loadWishlistFromLocalStorage();
+            commit('SET_WISHLIST', wishlist);
+        },
     },
     getters: {
+        // --- Getters cho giỏ hàng ---
         cartTotal: state => state.cart.reduce((total, item) => total + (item.price * (1 - (item.discount || 0) / 100) * item.quantity), 0),
         cartItemCount: state => state.cart.reduce((total, item) => total + item.quantity, 0),
+
+        // --- Getters cho người dùng ---
         isLoggedIn: state => !!state.user,
-        currentUser: state => state.user
+        currentUser: state => state.user,
+
+        // --- Getters cho wishlist ---
+        wishlistItems: state => state.wishlist,
+        isInWishlist: (state) => (productId) => {
+            return state.wishlist.some(item => item.id === productId);
+        }
     }
 })
 export default store;
