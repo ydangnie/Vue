@@ -10,7 +10,7 @@ app.use(express.json());
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'azalman.store@gmail.com', // Email của bạn để gửi
+        user: 'nieydpk04105@gmail.com', // Email của bạn để gửi
         pass: 'mfay fdjf mbxx eahq' // Mật khẩu ứng dụng bạn đã cung cấp
     }
 });
@@ -24,7 +24,7 @@ app.post('/send-order-email', (req, res) => {
 
             // Email gửi cho khách hàng
             const mailToCustomer = {
-                    from: '"Azalman Store" <azalman.store@gmail.com>',
+                    from: '"Azalman Store" <nieydpk04105@gmail.com>',
                     to: order.customer.email,
                     subject: `Xác nhận đơn hàng #${order.id}`,
                     html: `
@@ -43,8 +43,8 @@ app.post('/send-order-email', (req, res) => {
 
     // Email gửi cho quản trị viên
     const mailToAdmin = {
-        from: '"Azalman Store" <azalman.store@gmail.com>',
-        to: 'azalman.store@gmail.com', // Email của quản trị
+        from: '"Azalman Store" <nieydpk04105@gmail.com>',
+        to: 'nieydpk04105@gmail.com', // Email của quản trị
         subject: `Có đơn hàng mới #${order.id}`,
         html: `
             <h1>Có một đơn hàng mới!</h1>
@@ -67,7 +67,7 @@ app.post('/send-order-email', (req, res) => {
     });
 });
 
-const PORT = 3004; // Sử dụng một cổng khác để tránh xung đột
+const PORT = 3003; // Sử dụng một cổng khác để tránh xung đột
 app.listen(PORT, () => {
     console.log(`Email server đang chạy tại http://localhost:${PORT}`);
 });

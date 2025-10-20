@@ -35,7 +35,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex';
 
@@ -46,9 +45,6 @@ export default {
   },
   methods: {
     ...mapActions(['toggleWishlist'])
-  },
-  created() {
-      this.$store.dispatch('loadWishlist');
   }
 };
 </script>
