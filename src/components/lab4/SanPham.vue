@@ -24,31 +24,31 @@
       </div>
 
       <div class="row">
-        <div v-for="sanPham in filteredProducts" :key="sanPham.id" class="col-lg-3 col-md-4 col-sm-6 mb-4">
+        <div v-for="sanPhamItem in filteredProducts" :key="sanPhamItem.id" class="col-lg-3 col-md-4 col-sm-6 mb-4">
           <div class="card h-100 product-card">
             <div class="card-img-container">
-              <img v-if="sanPham.images && sanPham.images.length > 0" :src="sanPham.images[0]" class="card-img-top" :alt="sanPham.title">
-              <img v-else src="https://via.placeholder.com/300x200?text=No+Image" class="card-img-top" :alt="sanPham.title">
-              <div v-if="sanPham.discount > 0" class="discount-badge">-${{ sanPham.discount }}%</div>
-              <div v-if="sanPham.featured" class="featured-badge">Nổi bật</div>
+              <img v-if="sanPhamItem.images && sanPhamItem.images.length > 0" :src="sanPhamItem.images[0]" class="card-img-top" :alt="sanPhamItem.title">
+              <img v-else src="https://via.placeholder.com/300x200?text=No+Image" class="card-img-top" :alt="sanPhamItem.title">
+              <div v-if="sanPhamItem.discount > 0" class="discount-badge">-${{ sanPhamItem.discount }}%</div>
+              <div v-if="sanPhamItem.featured" class="featured-badge">Nổi bật</div>
             </div>
             <div class="card-body d-flex flex-column">
-              <h5 class="card-title">{{ sanPham.title }}</h5>
-              <p class="card-text text-muted">{{ sanPham.category }}</p>
+              <h5 class="card-title">{{ sanPhamItem.title }}</h5>
+              <p class="card-text text-muted">{{ sanPhamItem.category }}</p>
               <div class="price-section mb-3">
-                <span v-if="sanPham.discount > 0" class="original-price">${{ sanPham.price }}</span>
-                <span class="final-price">${{ (sanPham.price * (1 - sanPham.discount / 100)).toFixed(2) }}</span>
+                <span v-if="sanPhamItem.discount > 0" class="original-price">${{ sanPhamItem.price }}</span>
+                <span class="final-price">${{ (sanPhamItem.price * (1 - sanPhamItem.discount / 100)).toFixed(2) }}</span>
               </div>
               <div class="quantity-info mb-2">
-                <small class="text-muted">Còn lại: {{ sanPham.quantity }} sản phẩm</small>
+                <small class="text-muted">Còn lại: {{ sanPhamItem.quantity }} sản phẩm</small>
               </div>
               <div class="mt-auto">
                 <div class="d-grid gap-2">
-                   <button id="them" @click="addToCart(sanPham)" class="btn btn-success btn-sm" :disabled="addingToCart[sanPham.id] || sanPham.quantity <= 0">
-                    <span v-if="addingToCart[sanPham.id]" class="spinner-border spinner-border-sm me-1" role="status"></span>
-                    <i class="fas fa-cart-plus me-1"></i>{{ sanPham.quantity <= 0 ? 'Hết hàng' : 'Thêm vào giỏ' }}
+                   <button id="them" @click="addToCart(sanPhamItem)" class="btn btn-success btn-sm" :disabled="addingToCart[sanPhamItem.id] || sanPhamItem.quantity <= 0">
+                    <span v-if="addingToCart[sanPhamItem.id]" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                    <i class="fas fa-cart-plus me-1"></i>{{ sanPhamItem.quantity <= 0 ? 'Hết hàng' : 'Thêm vào giỏ' }}
                   </button>
-                  <router-link :to="'/chi-tiet-san-pham/' + sanPham.id" class="btn btn-primary btn-sm">Xem chi tiết</router-link>
+                  <router-link :to="'/chi-tiet-san-pham/' + sanPhamItem.id" class="btn btn-primary btn-sm">Xem chi tiết</router-link>
                 </div>
               </div>
             </div>
@@ -72,13 +72,13 @@ export default {
   name: 'SanPham',
   data() {
     return {
-      danhSachSanPham: [],
-      filteredProducts: [],
+      danhSachSanPham: [], // Danh sách sản phẩm gốc
+      filteredProducts: [], // Danh sách sản phẩm đã lọc/sắp xếp
       categories: [],
-      searchQuery: '',
-      selectedCategory: '',
-      sortBy: 'title',
-      addingToCart: {}
+      searchQuery: '', // Từ khóa tìm kiếm
+      selectedCategory: '', // Danh mục được chọn
+      sortBy: 'title', // Tiêu chí sắp xếp
+      addingToCart: {} // Trạng thái đang thêm vào giỏ hàng cho từng sản phẩm
     };
   },
   mounted() {
@@ -87,17 +87,17 @@ export default {
   },
   methods: {
     ...mapActions({
-      addToCartAction: 'addToCart'
+      addToCartAction: 'addToCart' // Map action 'addToCart' từ Vuex store
     }),
     layDuLieuSanPham() {
       axios.get('/products')
         .then(response => {
           this.danhSachSanPham = response.data;
-          this.filteredProducts = [...this.danhSachSanPham];
-          this.sortProducts();
+          this.filteredProducts = [...this.danhSachSanPham]; // Sao chép danh sách gốc
+          this.sortProducts(); // Sắp xếp lần đầu
         })
         .catch(error => {
-          console.error('Lỗi:', error);
+          console.error('Loi tai san pham:', error);
         });
     },
     layCategories() {
@@ -106,71 +106,78 @@ export default {
           this.categories = response.data;
         })
         .catch(error => {
-          console.error('Lỗi:', error);
+          console.error('Loi tai danh muc:', error);
         });
     },
     filterProducts() {
-      let filtered = [...this.danhSachSanPham];
+      let filtered = [...this.danhSachSanPham]; // Bắt đầu với danh sách gốc
 
-      // Filter by search query
+      // Lọc theo từ khóa tìm kiếm
       if (this.searchQuery) {
+        const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter(product =>
-          product.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          product.description.toLowerCase().includes(this.searchQuery.toLowerCase())
+          product.title.toLowerCase().includes(query) ||
+          product.description.toLowerCase().includes(query)
         );
       }
 
-      // Filter by category
+      // Lọc theo danh mục
       if (this.selectedCategory) {
         filtered = filtered.filter(product => product.category === this.selectedCategory);
       }
 
-      this.filteredProducts = filtered;
-      this.sortProducts();
+      this.filteredProducts = filtered; // Cập nhật danh sách đã lọc
+      this.sortProducts(); // Sắp xếp lại danh sách đã lọc
     },
     sortProducts() {
       this.filteredProducts.sort((a, b) => {
         switch (this.sortBy) {
           case 'price-low':
-            return a.price - b.price;
+            return (a.price * (1 - a.discount / 100)) - (b.price * (1 - b.discount / 100)); // Sắp xếp theo giá cuối cùng
           case 'price-high':
-            return b.price - a.price;
+            return (b.price * (1 - b.discount / 100)) - (a.price * (1 - a.discount / 100)); // Sắp xếp theo giá cuối cùng
           case 'discount':
             return b.discount - a.discount;
-          default:
+          default: // 'title'
             return a.title.localeCompare(b.title);
         }
       });
     },
     async addToCart(product) {
-      if (this.addingToCart[product.id]) return;
+      if (this.addingToCart[product.id]) return; // Ngăn click nhiều lần
 
-      this.addingToCart[product.id] = true;
+      this.addingToCart[product.id] = true; // Đặt trạng thái đang thêm
       try {
         const productWithStock = {
           ...product,
-          stock: product.quantity // Chuyển 'quantity' từ db.json thành 'stock'
+          stock: product.quantity // Chuyển 'quantity' thành 'stock' cho Vuex store
         };
-        // Gọi action với số lượng là 1
+        // Gọi action addToCart từ Vuex store với số lượng là 1
         await this.addToCartAction({ product: productWithStock, quantity: 1 });
-        this.$toast.success('Thành công!', 'Đã thêm sản phẩm vào giỏ hàng.');
+        this.$toast.success('Thanh cong!', 'Da them san pham vao gio hang.'); // Thông báo thành công
       } catch (error) {
-        console.error('Lỗi khi thêm vào giỏ hàng:', error);
-        this.$toast.error('Thêm thất bại!', error.message || 'Có lỗi xảy ra, vui lòng thử lại.');
+        console.error('Loi khi them vao gio hang:', error);
+        this.$toast.error('Them that bai!', error.message || 'Co loi xay ra, vui long thu lai.'); // Thông báo lỗi
       } finally {
-        this.addingToCart[product.id] = false;
+        this.addingToCart[product.id] = false; // Reset trạng thái
       }
     }
   },
   watch: {
+    // Theo dõi thay đổi của sortBy để sắp xếp lại
     sortBy() {
       this.sortProducts();
+    },
+    // Theo dõi thay đổi của selectedCategory và searchQuery để lọc lại
+    selectedCategory() {
+        this.filterProducts();
     }
   }
 };
 </script>
 
 <style scoped>
+/* Giữ nguyên CSS */
 .product-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: none;
@@ -269,8 +276,11 @@ export default {
 }
 #them{
   background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-  border: black solid black;
+  border: black solid 1px; /* Sửa lại border */
   transition: all 0.3s ease;
   color: black;
+}
+#them:hover {
+  background: linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%); /* Hiệu ứng hover */
 }
 </style>

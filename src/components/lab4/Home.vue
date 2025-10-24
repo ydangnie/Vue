@@ -1,6 +1,5 @@
 <template>
   <div class="home">
-    <!-- Hero Section -->
     <section class="hero-section bg-primary text-white py-5">
       <div class="container">
         <div class="row align-items-center">
@@ -19,7 +18,6 @@
       </div>
     </section>
 
-    <!-- Featured Products -->
     <section class="featured-products py-5">
       <div class="container">
         <h2 class="text-center mb-5">Sản phẩm nổi bật</h2>
@@ -54,7 +52,6 @@
       </div>
     </section>
 
-    <!-- Categories Section -->
     <section class="categories py-5 bg-light">
       <div class="container">
         <h2 class="text-center mb-5">Danh mục sản phẩm</h2>
@@ -64,7 +61,7 @@
               <i class="fas fa-tag fa-3x text-primary mb-3"></i>
               <h5>{{ category.name }}</h5>
               <router-link :to="'/san-pham?category=' + category.name" class="btn btn-outline-primary">
-                Xem sản phẩm
+                Xem san pham
               </router-link>
             </div>
           </div>
@@ -72,10 +69,8 @@
       </div>
     </section>
 
-    <!-- AI Product Suggestions -->
     <GoiYSanPhamAI />
 
-    <!-- Stats Section -->
     <section class="stats py-5">
       <div class="container">
         <div class="row text-center">
@@ -115,12 +110,12 @@
 
 <script>
 import axios from '../../../axios.js';
-import GoiYSanPhamAI from './GoiYSanPham.vue';
+import GoiYSanPhamAI from './GoiYSanPham.vue'; // Đổi tên component gợi ý
 
 export default {
   name: 'Home',
   components: {
-    GoiYSanPhamAI
+    GoiYSanPhamAI // Sử dụng tên component đã đổi
   },
   data() {
     return {
@@ -138,10 +133,11 @@ export default {
       axios.get('/products')
         .then(response => {
           this.products = response.data;
+          // Lọc sản phẩm nổi bật
           this.featuredProducts = this.products.filter(product => product.featured);
         })
         .catch(error => {
-          console.error('Error loading products:', error);
+          console.error('Loi tai san pham:', error);
         });
 
       // Load categories
@@ -150,7 +146,7 @@ export default {
           this.categories = response.data;
         })
         .catch(error => {
-          console.error('Error loading categories:', error);
+          console.error('Loi tai danh muc:', error);
         });
     }
   }
@@ -158,6 +154,7 @@ export default {
 </script>
 
 <style scoped>
+/* Giữ nguyên CSS */
 .hero-section {
   background: linear-gradient(135deg, #747578 0%, #000000 100%);
   min-height: 60vh;
