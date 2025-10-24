@@ -18,7 +18,7 @@
               </div>
               <div class="mt-auto">
                 <router-link :to="'/chi-tiet-san-pham/' + product.id" class="btn btn-primary btn-sm w-100 mb-2">Xem chi tiết</router-link>
-                <button @click="toggleWishlist(product)" class="btn btn-danger btn-sm w-100">
+                <button @click="removeFromWishlist(product)" class="btn btn-danger btn-sm w-100">
                   <i class="fas fa-trash-alt me-1"></i> Bỏ yêu thích
                 </button>
               </div>
@@ -44,12 +44,18 @@ export default {
     ...mapGetters(['wishlistItems'])
   },
   methods: {
-    ...mapActions(['toggleWishlist'])
+    ...mapActions(['toggleWishlist']),
+    // Thêm hàm này để xử lý việc xóa và hiển thị thông báo
+    removeFromWishlist(product) {
+      this.toggleWishlist(product);
+      this.$toast.info("Thông báo", `Đã bỏ "${product.title}" khỏi danh sách yêu thích.`);
+    }
   }
 };
 </script>
 
 <style scoped>
+/* Giữ nguyên style */
 .product-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: none;

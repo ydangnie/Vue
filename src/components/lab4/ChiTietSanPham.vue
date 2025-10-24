@@ -54,7 +54,7 @@
               <h5>Mô tả sản phẩm</h5>
               <p>{{ sanPham.description }}</p>
             </div>
-            
+
             <div class="mb-4" v-if="sanPham.quantity > 0">
                 <label class="form-label fw-bold">Số lượng:</label>
                 <div class="quantity-controls d-flex align-items-center">
@@ -69,15 +69,16 @@
                 <span v-if="addingToCart" class="spinner-border spinner-border-sm me-2" role="status"></span>
                 <i class="fas fa-cart-plus"></i> {{ addingToCart ? 'Đang thêm...' : (sanPham.quantity <= 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng') }}
               </button>
-              <button @click="toggleWishlistHandler" :class="['btn btn-lg', isProductInWishlist ? 'btn-danger' : 'btn-outline-danger']" :disabled="!isLoggedIn">
-                <i :class="['fas fa-heart me-2', isProductInWishlist ? 'text-white' : '']"></i> 
-                {{ isProductInWishlist ? 'Đã yêu thích' : 'Yêu thích' }}
+              <button @click="toggleWishlistHandler" :class="['btn btn-lg', _isProductInWishlistBeforeToggle ? 'btn-danger' : 'btn-outline-danger']" :disabled="!isLoggedIn">
+                 <i :class="['fas fa-heart me-2', _isProductInWishlistBeforeToggle ? 'text-white' : '']"></i>
+                 {{ _isProductInWishlistBeforeToggle ? 'Đã yêu thích' : 'Yêu thích' }}
               </button>
+
             </div>
           </div>
         </div>
       </div>
-      
+
       <div class="product-reviews mt-5 card">
         <div class="card-header">
             <h3 class="mb-0">Đánh giá sản phẩm</h3>
@@ -89,7 +90,7 @@
                 <div class="mb-3">
                     <label class="form-label">Xếp hạng</label>
                     <div>
-                    <i v-for="n in 5" :key="n" 
+                    <i v-for="n in 5" :key="n"
                         :class="['fas fa-star', n <= newReview.rating ? 'text-warning' : 'text-muted']"
                         @click="newReview.rating = n"
                         style="cursor: pointer; font-size: 1.5rem;"></i>
@@ -159,8 +160,13 @@ export default {
     isLoggedIn() {
       return !!this.user;
     },
-    isProductInWishlist() {
-        return this.isInWishlist(this.sanPham.id);
+    // Sửa computed property để lấy trạng thái *trước khi* toggle
+    _isProductInWishlistBeforeToggle() {
+        // Kiểm tra xem sanPham đã được load chưa trước khi truy cập id
+        if (this.sanPham && this.sanPham.id) {
+            return this.isInWishlist(this.sanPham.id);
+        }
+        return false; // Trả về false nếu sanPham chưa sẵn sàng
     }
   },
   mounted() {
@@ -203,11 +209,17 @@ export default {
             this.$toast.warning("Vui lòng đăng nhập để sử dụng chức năng này!");
             return;
         }
+        // Lưu trạng thái trước khi thay đổi
+        const wasInWishlist = this._isProductInWishlistBeforeToggle; // Sử dụng computed đã sửa
+
+        // Thực hiện hành động thay đổi trạng thái
         this.toggleWishlist(this.sanPham);
-        if (this.isProductInWishlist) {
-            this.$toast.info("Đã bỏ sản phẩm khỏi danh sách yêu thích.");
+
+        // Kiểm tra trạng thái *trước khi* toggle để hiển thị thông báo đúng
+        if (wasInWishlist) {
+            this.$toast.info("Đã bỏ sản phẩm khỏi danh sách yêu thích."); // Thông báo bỏ thành công
         } else {
-            this.$toast.success("Đã thêm sản phẩm vào danh sách yêu thích!");
+            this.$toast.success("Đã thêm sản phẩm vào danh sách yêu thích!"); // Thông báo thêm thành công
         }
     },
     async submitReview() {
@@ -215,7 +227,7 @@ export default {
         this.$toast.error('Vui lòng nhập bình luận!');
         return;
       }
-      
+
       const reviewData = {
         author: this.user.username,
         rating: this.newReview.rating,
@@ -251,6 +263,7 @@ export default {
 </script>
 
 <style scoped>
+/* Giữ nguyên style */
 .quantity-controls { max-width: 150px; }
 .quantity-input { text-align: center; }
 .product-reviews {
@@ -307,4 +320,24 @@ export default {
   font-weight: 700;
   margin-bottom: 1rem;
 }
+
+/* Thêm style cho nút yêu thích */
+.btn-danger {
+  /* Style khi đã yêu thích */
+  background: #dc3545;
+  color: white;
+}
+.btn-outline-danger {
+   /* Style khi chưa yêu thích */
+  color: #dc3545;
+  border-color: #dc3545;
+}
+.btn-outline-danger:hover {
+  background: #dc3545;
+  color: white;
+}
+.fa-heart.text-white { /* Đảm bảo icon trái tim màu trắng khi nút là màu đỏ */
+    color: white !important;
+}
+
 </style>

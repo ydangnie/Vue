@@ -66,8 +66,7 @@
               <select v-model="sortBy" @change="sortUsers" class="form-control">
                 <option value="username">Sắp xếp theo tên</option>
                 <option value="email">Sắp xếp theo email</option>
-                <option value="totalSpent">Sắp xếp theo chi tiêu</option>
-              </select>
+                <option value="totalSpent">Sắp xếp theo chi tiêu</option> </select>
             </div>
             <div class="col-md-2">
               <button @click="resetFilters" class="btn btn-secondary w-100">
@@ -91,8 +90,7 @@
                   <th>Tên đăng nhập</th>
                   <th>Email</th>
                   <th>Vai trò</th>
-                  <th>Tổng chi tiêu</th>
-                  <th>Ngày tạo</th>
+                  <th>Tổng chi tiêu</th> <th>Ngày tạo</th>
                   <th>Thao tác</th>
                 </tr>
               </thead>
@@ -106,7 +104,7 @@
                       {{ user.role === 'admin' ? 'Quản trị viên' : 'Người dùng' }}
                     </span>
                   </td>
-                  <td>
+                   <td>
                     <span class="fw-bold text-success">${{ user.totalSpent ? user.totalSpent.toFixed(2) : '0.00' }}</span>
                   </td>
                   <td>{{ formatDate(user.id) }}</td>
@@ -172,58 +170,67 @@ export default {
       filteredUsers: [],
       searchQuery: '',
       roleFilter: '',
-      sortBy: 'username',
+      sortBy: 'username', // Mặc định sắp xếp theo tên
       showEditModal: false,
       editUserForm: {},
       currentUser: null
     };
   },
   computed: {
+    // Các computed properties khác giữ nguyên
     adminCount() { return this.users.filter(user => user.role === 'admin').length; },
     userCount() { return this.users.filter(user => user.role === 'user').length; },
     newUsersThisMonth() {
       const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      // Giả sử ID là timestamp, nếu không cần sửa lại logic này
       return this.users.filter(user => new Date(parseInt(user.id)) >= startOfMonth).length;
     }
   },
   mounted() {
     this.currentUser = JSON.parse(localStorage.getItem('user'));
-    this.loadUsersAndOrders();
+    this.loadUsersAndOrders(); // Gọi hàm load mới
   },
   watch: {
+    // Watchers giữ nguyên
     searchQuery() { this.filterUsers(); },
     roleFilter() { this.filterUsers(); }
   },
   methods: {
+    // Hàm load dữ liệu mới
     async loadUsersAndOrders() {
       try {
+        // Lấy đồng thời cả users và orders
         const [usersResponse, ordersResponse] = await Promise.all([
           axios.get('/users'),
           axios.get('/orders')
         ]);
-        
+
         const users = usersResponse.data;
         const orders = ordersResponse.data;
 
+        // Tính tổng chi tiêu cho mỗi email từ các đơn hàng 'delivered'
         const userSpending = {};
         orders.forEach(order => {
-          if (order.status === 'delivered') {
+          if (order.status === 'delivered') { // Chỉ tính đơn hàng đã giao thành công
             const email = order.customer.email;
             userSpending[email] = (userSpending[email] || 0) + order.total;
           }
         });
 
+        // Gắn thông tin chi tiêu vào danh sách users
         this.users = users.map(user => ({
           ...user,
-          totalSpent: userSpending[user.email] || 0
+          totalSpent: userSpending[user.email] || 0 // Gán tổng chi tiêu, mặc định là 0
         }));
 
         this.filteredUsers = [...this.users];
-        this.sortUsers();
+        this.sortUsers(); // Sắp xếp lại sau khi có dữ liệu
       } catch (error) {
-        console.error('Lỗi tải dữ liệu:', error);
+        console.error('Lỗi tải dữ liệu người dùng và đơn hàng:', error);
+         this.$toast.error('Lỗi tải dữ liệu!');
       }
     },
+    // Các hàm filter, sort, edit, delete giữ nguyên logic cơ bản
     filterUsers() {
       let filtered = this.users.filter(user =>
         (user.username.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
@@ -231,56 +238,74 @@ export default {
         (this.roleFilter ? user.role === this.roleFilter : true)
       );
       this.filteredUsers = filtered;
-      this.sortUsers();
+      this.sortUsers(); // Sắp xếp lại sau khi lọc
     },
+    // Cập nhật hàm sortUsers để xử lý sắp xếp theo chi tiêu
     sortUsers() {
       this.filteredUsers.sort((a, b) => {
         switch (this.sortBy) {
           case 'email': return a.email.localeCompare(b.email);
-          case 'totalSpent': return b.totalSpent - a.totalSpent;
-          default: return a.username.localeCompare(b.username);
+          case 'totalSpent': return b.totalSpent - a.totalSpent; // Sắp xếp giảm dần theo chi tiêu
+          default: return a.username.localeCompare(b.username); // Mặc định theo tên
         }
       });
     },
     resetFilters() {
       this.searchQuery = '';
       this.roleFilter = '';
-      this.sortBy = 'username';
+      this.sortBy = 'username'; // Reset về sắp xếp theo tên
       this.filteredUsers = [...this.users];
-      this.sortUsers();
+      this.sortUsers(); // Sắp xếp lại
     },
     editUser(user) {
-      this.editUserForm = { ...user };
+      // Bỏ totalSpent khỏi form edit để tránh ghi đè
+      const { totalSpent, ...editableUser } = user;
+      this.editUserForm = { ...editableUser };
       this.showEditModal = true;
     },
     closeEditModal() {
       this.showEditModal = false;
     },
-    saveUserChanges() {
-      axios.put(`/users/${this.editUserForm.id}`, this.editUserForm)
-        .then(() => {
-          this.loadUsersAndOrders();
-          this.closeEditModal();
-        })
-        .catch(error => console.error('Lỗi cập nhật user:', error));
-    },
-    toggleUserRole(user) {
-      const newRole = user.role === 'admin' ? 'user' : 'admin';
-      axios.patch(`/users/${user.id}`, { role: newRole })
-        .then(() => this.loadUsersAndOrders())
-        .catch(error => console.error('Lỗi đổi vai trò:', error));
-    },
-    deleteUser(userId) {
-      if (confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-        axios.delete(`/users/${userId}`)
-          .then(() => this.loadUsersAndOrders())
-          .catch(error => console.error('Lỗi xóa user:', error));
+    async saveUserChanges() {
+       try {
+        await axios.put(`/users/${this.editUserForm.id}`, this.editUserForm);
+        this.loadUsersAndOrders(); // Load lại cả users và orders
+        this.closeEditModal();
+        this.$toast.success('Cập nhật người dùng thành công!');
+      } catch (error) {
+        console.error('Lỗi cập nhật người dùng:', error);
+        this.$toast.error('Lỗi cập nhật người dùng!');
       }
     },
+    async toggleUserRole(user) {
+      const newRole = user.role === 'admin' ? 'user' : 'admin';
+      try {
+        await axios.patch(`/users/${user.id}`, { role: newRole });
+        this.loadUsersAndOrders(); // Load lại cả users và orders
+        this.$toast.success('Đổi vai trò thành công!');
+      } catch (error) {
+        console.error('Lỗi đổi vai trò:', error);
+        this.$toast.error('Lỗi đổi vai trò!');
+      }
+    },
+    async deleteUser(userId) {
+      if (confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
+        try {
+          await axios.delete(`/users/${userId}`);
+          this.loadUsersAndOrders(); // Load lại cả users và orders
+          this.$toast.success('Xóa người dùng thành công!');
+        } catch (error) {
+          console.error('Lỗi xóa người dùng:', error);
+          this.$toast.error('Lỗi xóa người dùng!');
+        }
+      }
+    },
+    // Các hàm helper giữ nguyên
     getRoleBadgeClass(role) {
       return role === 'admin' ? 'badge bg-danger' : 'badge bg-primary';
     },
     formatDate(timestamp) {
+      // Giả sử ID là timestamp, nếu không cần sửa lại logic này
       try {
         return new Date(parseInt(timestamp)).toLocaleDateString('vi-VN');
       } catch (e) { return 'N/A'; }
@@ -290,6 +315,7 @@ export default {
 </script>
 
 <style scoped>
+/* Giữ nguyên style */
 .stat-card { border-radius: 10px; padding: 20px; display: flex; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
 .stat-icon { font-size: 2rem; margin-right: 15px; }
 .stat-content h3 { margin: 0; font-size: 2rem; font-weight: bold; }

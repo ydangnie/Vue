@@ -1,8 +1,8 @@
 // email-server.js
-const express = require('express');
-const nodemailer = require('nodemailer');
-const cors = require('cors');
-
+// email-server.js
+import express from 'express';
+import nodemailer from 'nodemailer';
+import cors from 'cors';
 const app = express();
 app.use(cors()); // Cho phép cross-origin requests
 app.use(express.json());
@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'nieydpk04105@gmail.com', // Email của bạn để gửi
-        pass: 'mfay fdjf mbxx eahq' // Mật khẩu ứng dụng bạn đã cung cấp
+        pass: 'irxq xspa fgpa xnud' // Mật khẩu ứng dụng bạn đã cung cấp
     }
 });
 
@@ -44,7 +44,7 @@ app.post('/send-order-email', (req, res) => {
     // Email gửi cho quản trị viên
     const mailToAdmin = {
         from: '"Azalman Store" <nieydpk04105@gmail.com>',
-        to: 'nieydpk04105@gmail.com', // Email của quản trị
+        to: 'dangnie.1982006@gmail.com', // Email của quản trị
         subject: `Có đơn hàng mới #${order.id}`,
         html: `
             <h1>Có một đơn hàng mới!</h1>
@@ -67,7 +67,7 @@ app.post('/send-order-email', (req, res) => {
     });
 });
 
-const PORT = 3003; // Sử dụng một cổng khác để tránh xung đột
+const PORT = 3004; // Sử dụng một cổng khác để tránh xung đột
 app.listen(PORT, () => {
     console.log(`Email server đang chạy tại http://localhost:${PORT}`);
 });
