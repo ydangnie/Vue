@@ -1,121 +1,119 @@
 <template>
-  <div class="thanh-toan">
-    <div class="container">
+  <div class="trang-thanh-toan"> <div class="container">
       <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><router-link to="/">Trang chủ</router-link></li>
           <li class="breadcrumb-item"><router-link to="/gio-hang">Giỏ hàng</router-link></li>
-          <li class="breadcrumb-item active">Thanh toán</li>
+          <li class="breadcrumb-item active" aria-current="page">Thanh toán</li>
         </ol>
       </nav>
 
       <div class="row">
         <div class="col-lg-8">
-          <div class="card mb-4">
+          <div class="card mb-4 shadow-sm">
             <div class="card-header">
-              <h4 class="mb-0">Thông tin đơn hàng</h4>
+              <h4 class="mb-0"><i class="fas fa-receipt me-2"></i>Thông tin đơn hàng</h4>
             </div>
             <div class="card-body">
-              <div v-for="item in cart" :key="item.id" class="order-item mb-3 pb-3 border-bottom">
-                <div class="row align-items-center">
-                  <div class="col-md-2">
-                    <img :src="item.images && item.images.length > 0 ? item.images[0] : 'https://via.placeholder.com/80x80?text=No+Image'"
+              <div v-for="item in gioHang" :key="item.id" class="order-item mb-3 pb-3 border-bottom">
+                <div class="row align-items-center gy-2 gy-md-0">
+                  <div class="col-md-2 col-3">
+                    <img :src="item.images && item.images.length > 0 ? item.images[0] : 'https://via.placeholder.com/80x80/6c757d/ffffff?text=N/A'"
                          :alt="item.title" class="img-fluid rounded">
                   </div>
-                  <div class="col-md-4">
-                    <h6 class="mb-1">{{ item.title }}</h6>
+                  <div class="col-md-4 col-9">
+                    <h6 class="mb-1 text-truncate">{{ item.title }}</h6>
                     <small class="text-muted">{{ item.category }}</small>
                   </div>
-                  <div class="col-md-2">
-                    <span class="fw-bold">${{ (item.price * (1 - item.discount / 100)).toFixed(2) }}</span>
+                  <div class="col-md-2 col-4 text-md-start">
+                    <span class="fw-bold d-block">${{ (item.price * (1 - (item.discount || 0) / 100)).toFixed(2) }}</span>
+                    <small v-if="(item.discount || 0) > 0" class="text-muted text-decoration-line-through">${{ item.price.toFixed(2) }}</small>
                   </div>
-                  <div class="col-md-2">
+                  <div class="col-md-2 col-3 text-center text-md-start">
                     <span class="badge bg-secondary">x{{ item.quantity }}</span>
                   </div>
-                  <div class="col-md-2">
-                    <span class="fw-bold text-primary">${{ ((item.price * (1 - item.discount / 100)) * item.quantity).toFixed(2) }}</span>
+                  <div class="col-md-2 col-5 text-end">
+                    <span class="fw-bold item-subtotal">${{ ((item.price * (1 - (item.discount || 0) / 100)) * item.quantity).toFixed(2) }}</span>
                   </div>
                 </div>
               </div>
+               <div v-if="!gioHang || gioHang.length === 0" class="text-center text-muted py-3">
+                  Giỏ hàng của bạn đang trống.
+               </div>
             </div>
           </div>
 
-          <div class="card mb-4">
+          <div class="card mb-4 shadow-sm">
             <div class="card-header">
-              <h4 class="mb-0">Thông tin khách hàng</h4>
+              <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i>Thông tin khách hàng</h4>
             </div>
             <div class="card-body">
-              <form @submit.prevent="placeOrder">
+              <form id="checkoutForm" @submit.prevent="xuLyDatHang">
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Họ tên *</label>
-                    <input v-model="orderInfo.customerName" type="text" class="form-control" required>
+                    <input v-model="thongTinDatHang.tenKhachHang" type="text" class="form-control" required placeholder="Nhập họ và tên">
                   </div>
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Email *</label>
-                    <input v-model="orderInfo.customerEmail" type="email" class="form-control" required readonly>
+                    <input v-model="thongTinDatHang.emailKhachHang" type="email" class="form-control" required readonly disabled>
                   </div>
                 </div>
                 <div class="mb-3">
                   <label class="form-label">Số điện thoại *</label>
-                  <input v-model="orderInfo.customerPhone" type="tel" class="form-control" required>
+                  <input v-model="thongTinDatHang.soDienThoai" type="tel" class="form-control" required placeholder="Nhập số điện thoại">
                 </div>
                 <div class="mb-3">
                   <label class="form-label">Địa chỉ giao hàng *</label>
-                  <textarea v-model="orderInfo.shippingAddress" class="form-control" rows="3" required></textarea>
+                  <textarea v-model="thongTinDatHang.diaChiGiaoHang" class="form-control" rows="3" required placeholder="Nhập địa chỉ chi tiết (số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố)"></textarea>
                 </div>
                 <div class="mb-3">
                   <label class="form-label">Ghi chú</label>
-                  <textarea v-model="orderInfo.notes" class="form-control" rows="2" placeholder="Ghi chú thêm về đơn hàng..."></textarea>
+                  <textarea v-model="thongTinDatHang.ghiChu" class="form-control" rows="2" placeholder="Ghi chú thêm về đơn hàng (tùy chọn)..."></textarea>
                 </div>
               </form>
             </div>
           </div>
         </div>
 
-        <div class="col-lg-4" id="clol">
-          <div class="card sticky-top">
+        <div class="col-lg-4" id="cot-phai">
+          <div class="card sticky-top shadow-sm">
             <div class="card-header">
               <h5 class="mb-0">Tóm tắt đơn hàng</h5>
             </div>
             <div class="card-body">
               <div class="d-flex justify-content-between mb-2">
                 <span>Tổng sản phẩm:</span>
-                <span>{{ cartItemCount }}</span>
+                <span>{{ soLuongSanPhamTrongGio }}</span>
               </div>
               <div class="d-flex justify-content-between mb-2">
-                <span>Tổng tiền:</span>
-                <span class="fw-bold text-primary">${{ cartTotal.toFixed(2) }}</span>
-              </div>
-              <div v-if="promoDiscount > 0" class="d-flex justify-content-between mb-2">
+                <span>Tổng tiền hàng:</span>
+                <span class="fw-bold sum-text">${{ tongTienGioHang.toFixed(2) }}</span> </div>
+              <div v-if="giamGiaPromo > 0" class="d-flex justify-content-between mb-2">
                 <span>Mã giảm giá:</span>
-                <span class="fw-bold text-success">-${{ promoDiscount.toFixed(2) }}</span>
+                <span class="fw-bold text-success">-${{ giamGiaPromo.toFixed(2) }}</span>
               </div>
               <div class="d-flex justify-content-between mb-3">
                 <span>Phí vận chuyển:</span>
-                <span>Miễn phí</span>
+                <span class="text-success">Miễn phí</span>
               </div>
-              <hr>
+              <hr class="hr-dark">
               <div class="d-flex justify-content-between mb-4">
-                <span class="fw-bold">Tổng thanh toán:</span>
-                <span class="fw-bold text-danger fs-5">${{ finalTotal.toFixed(2) }}</span>
+                <span class="fw-bold fs-5">Tổng thanh toán:</span> <span class="fw-bold text-danger fs-5">${{ tongTienCuoiCung.toFixed(2) }}</span>
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Phương thức thanh toán</label>
-                <select v-model="orderInfo.paymentMethod" class="form-control">
+                <label class="form-label fw-bold">Phương thức thanh toán</label>
+                <select v-model="thongTinDatHang.phuongThucThanhToan" class="form-select">
                   <option value="cod">Thanh toán khi nhận hàng (COD)</option>
                   <option value="vnpay">Ví điện tử VNPay</option>
-                  <option value="bank">Chuyển khoản ngân hàng</option>
-                  <option value="card">Thẻ tín dụng</option>
-                </select>
+                  </select>
               </div>
 
-              <button @click="placeOrder" class="btn btn-success w-100" :disabled="placingOrder || cart.length === 0">
-                <span v-if="placingOrder" class="spinner-border spinner-border-sm me-2" role="status"></span>
-                <i class="fas fa-credit-card me-2"></i>
-                {{ placingOrder ? 'Đang xử lý...' : 'Đặt hàng' }}
-              </button>
+              <button type="submit" form="checkoutForm" class="btn btn-dark w-100 btn-lg" :disabled="dangXuLyDatHang || !gioHang || gioHang.length === 0">
+                <span v-if="dangXuLyDatHang" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                <i class="fas fa-check-circle me-2"></i>
+                {{ dangXuLyDatHang ? 'Đang xử lý...' : 'Hoàn tất Đặt hàng' }} </button>
 
               <div class="mt-3 text-center">
                 <router-link to="/gio-hang" class="btn btn-outline-secondary btn-sm">
@@ -131,115 +129,192 @@
 </template>
 
 <script>
+// Import helpers từ Vuex
 import { mapState, mapGetters, mapActions } from 'vuex';
+// Import axios đã cấu hình (cho API chính)
 import axios from '../../../axios.js';
+// Import module vnpay
 import { vnpay } from '../modules/models.js';
 
+// *** KÍCH HOẠT LẠI CHỨC NĂNG EMAIL ***
+// Tạo một instance axios riêng để gọi server email (chạy trên port 3004)
 const emailAxios = axios.create({
   baseURL: 'http://localhost:3004',
-  timeout: 10000
+  timeout: 10000 // Tăng thời gian chờ cho việc gửi mail
 });
+// *** KẾT THÚC KÍCH HOẠT EMAIL ***
 
 export default {
-  name: 'ThanhToan',
+  name: 'ThanhToan', // Tên component
   data() {
     return {
-      placingOrder: false,
-      orderInfo: {
-        customerName: '',
-        customerEmail: '',
-        customerPhone: '',
-        shippingAddress: '',
-        notes: '',
-        paymentMethod: 'cod',
-        promoCode: ''
+      dangXuLyDatHang: false, // Cờ báo đang xử lý
+      // Đối tượng lưu thông tin nhập từ form
+      thongTinDatHang: {
+        tenKhachHang: '',
+        emailKhachHang: '',
+        soDienThoai: '',
+        diaChiGiaoHang: '',
+        ghiChu: '',
+        phuongThucThanhToan: 'cod', // Mặc định
+        maGiamGia: '' // Tạm thời chưa dùng
       },
-      promoDiscount: 0,
-      promoCodeInfo: null
+      giamGiaPromo: 0, // Tạm thời chưa dùng
+      thongTinMaGiamGia: null // Tạm thời chưa dùng
     };
   },
   computed: {
-    ...mapState(['cart']),
-    ...mapGetters(['cartTotal', 'cartItemCount']),
-    finalTotal() {
-      return this.cartTotal - this.promoDiscount;
+    // Lấy state 'cart' từ Vuex và đặt tên là 'gioHang'
+    ...mapState({
+        gioHang: 'cart'
+    }),
+    // Lấy getters từ Vuex
+    ...mapGetters({
+        tongTienGioHang: 'cartTotal',
+        soLuongSanPhamTrongGio: 'cartItemCount'
+    }),
+    // Tính tổng tiền cuối cùng
+    tongTienCuoiCung() {
+      return this.tongTienGioHang - this.giamGiaPromo;
     }
   },
+  // Hàm chạy sau khi component được tạo
   mounted() {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user) {
-        this.orderInfo.customerName = user.username;
-        this.orderInfo.customerEmail = user.email;
+     // Kiểm tra nếu giỏ hàng trống thì chuyển về
+     if (!this.gioHang || this.gioHang.length === 0) {
+        this.$toast.warning("Giỏ hàng trống!", "Vui lòng thêm sản phẩm vào giỏ trước khi thanh toán.");
+        this.$router.push('/gio-hang');
+        return;
+     }
+
+    // Lấy thông tin người dùng từ localStorage để điền sẵn form
+    try {
+        const nguoiDung = JSON.parse(localStorage.getItem('user'));
+        if (nguoiDung) {
+            this.thongTinDatHang.tenKhachHang = nguoiDung.username;
+            this.thongTinDatHang.emailKhachHang = nguoiDung.email;
+        } else {
+            // Nếu không có user, bắt buộc đăng nhập
+            this.$toast.warning("Vui lòng đăng nhập để thanh toán.");
+            localStorage.setItem('redirectPath', this.$route.fullPath); // Lưu lại trang này
+            this.$router.push('/login'); // Chuyển về trang login
+        }
+    } catch(e) {
+        console.error("Lỗi đọc thông tin user:", e);
+        this.$toast.error("Có lỗi xảy ra, vui lòng đăng nhập lại.");
+        this.$router.push('/login');
     }
   },
   methods: {
-    ...mapActions(['clearCart']),
-    async placeOrder() {
-      if (this.cart.length === 0 || !this.orderInfo.customerName || !this.orderInfo.customerEmail || !this.orderInfo.customerPhone || !this.orderInfo.shippingAddress) {
-        this.$toast.error('Vui lòng điền đầy đủ thông tin!');
+    // Lấy action 'clearCart' từ Vuex
+    ...mapActions({
+        xoaSachGioHangAction: 'clearCart'
+    }),
+
+    // Hàm xử lý chính khi nhấn nút "Đặt hàng"
+    async xuLyDatHang() {
+      // Kiểm tra nếu đang xử lý hoặc giỏ hàng trống
+      if (this.dangXuLyDatHang || !this.gioHang || this.gioHang.length === 0) {
         return;
       }
       
-      this.placingOrder = true;
+      // Kiểm tra các trường bắt buộc
+      if (!this.thongTinDatHang.tenKhachHang || !this.thongTinDatHang.emailKhachHang || !this.thongTinDatHang.soDienThoai || !this.thongTinDatHang.diaChiGiaoHang) {
+        this.$toast.error('Vui lòng điền đầy đủ thông tin khách hàng bắt buộc (*)!');
+        return;
+      }
       
-      const orderData = {
+      // Bật cờ đang xử lý
+      this.dangXuLyDatHang = true;
+      
+      // Chuẩn bị dữ liệu đơn hàng
+      const duLieuDonHang = {
         id: Date.now().toString(),
         customer: {
-          name: this.orderInfo.customerName,
-          email: this.orderInfo.customerEmail,
-          phone: this.orderInfo.customerPhone,
-          address: this.orderInfo.shippingAddress
+          name: this.thongTinDatHang.tenKhachHang,
+          email: this.thongTinDatHang.emailKhachHang,
+          phone: this.thongTinDatHang.soDienThoai,
+          address: this.thongTinDatHang.diaChiGiaoHang
         },
-        items: [...this.cart],
-        total: this.finalTotal,
-        paymentMethod: this.orderInfo.paymentMethod,
-        status: 'pending', 
+        items: this.gioHang.map(item => ({ ...item })), // Sao chép giỏ hàng
+        total: this.tongTienCuoiCung,
+        paymentMethod: this.thongTinDatHang.phuongThucThanhToan,
+        status: 'pending', // Trạng thái ban đầu
         createdAt: new Date().toISOString(),
-        notes: this.orderInfo.notes,
-        originalTotal: this.cartTotal,
-        promoCode: this.orderInfo.promoCode || null,
-        promoDiscount: this.promoDiscount,
+        notes: this.thongTinDatHang.ghiChu,
+        originalTotal: this.tongTienGioHang,
+        promoCode: this.thongTinDatHang.maGiamGia || null,
+        promoDiscount: this.giamGiaPromo,
       };
 
-      if (this.orderInfo.paymentMethod === 'vnpay') {
+      // Xử lý tùy theo phương thức thanh toán
+      if (this.thongTinDatHang.phuongThucThanhToan === 'vnpay') {
+        // --- XỬ LÝ THANH TOÁN VNPay ---
         try {
-          const amountInVND = this.finalTotal * 23500;
-          const paymentUrl = vnpay.buildPaymentUrl({
-              vnp_Amount: Math.round(amountInVND * 100),
-              vnp_TxnRef: orderData.id,
-              vnp_OrderInfo: `Thanh toan don hang ${orderData.id}`,
+          const tiGia = 23500; // Tỷ giá (nên đặt ở file config)
+          const soTienVND = Math.round(this.tongTienCuoiCung * tiGia);
+          
+          // Tạo URL thanh toán
+          const urlThanhToan = vnpay.buildPaymentUrl({
+              vnp_Amount: soTienVND * 100, // Đơn vị: đồng xu
+              vnp_TxnRef: duLieuDonHang.id,
+              vnp_OrderInfo: `Thanh toan don hang #${duLieuDonHang.id}`,
               vnp_OrderType: 'other',
-              vnp_ReturnUrl: `http://localhost:5173/vnpay_return`,
+              vnp_ReturnUrl: `http://localhost:5173/vnpay_return`, // URL trả về
               vnp_Locale: 'vn',
           });
-          localStorage.setItem('pendingOrder', JSON.stringify(orderData));
-          window.location.href = paymentUrl;
+          
+          // Lưu tạm đơn hàng vào localStorage
+          localStorage.setItem('donHangChoXuLy', JSON.stringify(duLieuDonHang));
+          
+          // Chuyển hướng người dùng sang cổng VNPay
+          window.location.href = urlThanhToan;
+          // Không cần set dangXuLyDatHang = false vì trang sẽ bị chuyển đi
+
         } catch (error) {
-          console.error('VNPay error:', error);
+          console.error('Lỗi tạo URL VNPay:', error);
           this.$toast.error('Có lỗi khi tạo yêu cầu thanh toán VNPay!');
-          this.placingOrder = false;
+          this.dangXuLyDatHang = false; // Tắt cờ nếu có lỗi
         }
       } else {
+        // --- XỬ LÝ THANH TOÁN KHÁC (COD, ...) ---
         try {
-          const response = await axios.post('/orders', orderData);
-          const savedOrder = response.data;
+          // 1. Lưu đơn hàng vào db.json
+          const phanHoi = await axios.post('/orders', duLieuDonHang);
+          const donHangDaLuu = phanHoi.data;
 
+          // 2. *** KÍCH HOẠT LẠI: Gửi email xác nhận ***
           try {
-            await emailAxios.post('/send-order-email', { order: savedOrder });
+            // Gọi đến server email (chạy trên port 3004)
+            await emailAxios.post('/send-order-email', { order: donHangDaLuu }); //
+             console.log("Đã gửi yêu cầu email xác nhận.");
           } catch (emailError) {
-            console.error("Lỗi gửi email:", emailError);
+             // Nếu gửi mail lỗi, chỉ log ra console chứ không dừng lại
+            console.error("Lỗi gửi email xác nhận (Server email có thể chưa chạy):", emailError.message);
+            // Có thể thông báo cho người dùng
+            // this.$toast.warning("Đặt hàng thành công nhưng chưa gửi được email xác nhận.");
           }
+          // *** KẾT THÚC PHẦN EMAIL ***
 
-          this.clearCart();
+          // 3. Xóa giỏ hàng
+          await this.xoaSachGioHangAction();
+          
+          // 4. Thông báo thành công
           this.$toast.success('Đặt hàng thành công!');
+          
+          // 5. Chuyển hướng đến trang thành công
           this.$router.push({
             name: 'DonHangThanhCong',
-            params: { orderId: savedOrder.id }
+            params: { orderId: donHangDaLuu.id }
           });
+          
         } catch (error) {
+          // Xử lý lỗi khi lưu đơn hàng
+          console.error("Lỗi khi đặt hàng:", error);
           this.$toast.error('Có lỗi xảy ra khi đặt hàng!');
         } finally {
-          this.placingOrder = false;
+          // Dù thành công hay thất bại (trừ VNPay) đều tắt cờ xử lý
+          this.dangXuLyDatHang = false;
         }
       }
     }
@@ -248,23 +323,168 @@ export default {
 </script>
 
 <style scoped>
-.thanh-toan {
-  background-color: #f8f9fa;
-  min-height: 100vh;
-  padding: 20px 0;
+/* Container chính */
+.trang-thanh-toan {
+  background-color: #f8f9fa; /* Nền xám nhạt */
+  min-height: calc(100vh - 56px); /* Chiều cao tối thiểu trừ navbar */
+  padding: 30px 0;
 }
+
+/* Breadcrumb */
+.breadcrumb {
+  background-color: transparent;
+  padding: 0 0 1rem 0;
+}
+.breadcrumb-item a {
+  text-decoration: none;
+  color: #6c757d;
+}
+.breadcrumb-item a:hover {
+  color: #000;
+}
+.breadcrumb-item.active {
+  color: #212529;
+  font-weight: 500;
+}
+
+/* Card chung */
 .card {
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
 }
+
+/* Header của card */
 .card-header {
-  background: linear-gradient(135deg, #000000 0%, #000000 100%);
+  background: #343a40; /* Nền đen */
   color: white;
-  border-radius: 10px 10px 0 0 !important;
+  border-radius: 8px 8px 0 0 !important;
+  padding: 1rem 1.25rem;
+  border-bottom: none;
 }
-.btn-success {
-  background: linear-gradient(135deg, #000000 0%, #000000 100%);
+.card-header h4, .card-header h5 {
+   font-weight: 600;
+}
+
+/* Sản phẩm trong đơn hàng */
+.order-item {
+  padding-bottom: 1rem !important;
+}
+.order-item:last-child {
+   border-bottom: none !important;
+   margin-bottom: 0 !important;
+   padding-bottom: 0 !important;
+}
+.order-item img {
+  max-width: 80px;
+  height: 80px;
+  object-fit: cover;
+}
+.order-item h6 {
+   font-size: 0.95rem;
+   font-weight: 500;
+}
+.order-item .item-subtotal {
+   color: #343a40;
+}
+
+/* Form */
+.form-label {
+   font-weight: 500;
+   color: #495057;
+   margin-bottom: 0.5rem;
+}
+.form-control, .form-select {
+   border-radius: 6px;
+   border: 1px solid #ced4da;
+   padding: 0.6rem 0.9rem;
+}
+.form-control:focus, .form-select:focus {
+   border-color: #555;
+   box-shadow: 0 0 0 0.2rem rgba(85, 85, 85, 0.25);
+}
+.form-control:disabled, .form-control[readonly] {
+    background-color: #e9ecef;
+    opacity: 1;
+}
+
+/* Cột tóm tắt (cột phải) */
+#cot-phai .card {
+  position: sticky;
+  top: 20px;
+}
+#cot-phai .card-body span:first-child {
+   color: #6c757d;
+}
+#cot-phai .card-body span:last-child {
+   font-weight: 500;
+   color: #343a40;
+}
+#cot-phai .card-body .sum-text { /* Class cho tổng tiền hàng */
+    color: #343a40 !important;
+    font-weight: 600;
+}
+#cot-phai .card-body .text-danger { /* Tổng thanh toán */
+   color: #dc3545 !important;
+    font-weight: 700;
+}
+.hr-dark {
+   border-top: 1px solid #adb5bd;
+}
+
+/* Nút Đặt hàng */
+.btn-dark {
+  background: #212529;
   border: none;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border-radius: 8px; /* Thêm bo góc */
+}
+
+.btn-dark:hover:not(:disabled) {
+  background: #000000;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+.btn-dark:disabled {
+   opacity: 0.65;
+   cursor: not-allowed;
+}
+
+/* Nút quay lại */
+.btn-outline-secondary {
+   color: #6c757d;
+   border-color: #6c757d;
+   border-radius: 8px; /* Thêm bo góc */
+}
+.btn-outline-secondary:hover {
+   background-color: #6c757d;
+   color: white;
+}
+
+/* Responsive */
+@media (max-width: 991px) { /* Cho tablet và nhỏ hơn */
+   #cot-phai .card {
+      position: static; /* Bỏ sticky */
+      margin-top: 1.5rem;
+   }
+}
+@media (max-width: 768px) { /* Cho mobile */
+   .order-item .col-md-2,
+   .order-item .col-md-4 {
+      text-align: left;
+   }
+   .order-item .col-4.text-md-start {
+       text-align: left !important;
+   }
+   .order-item .col-3.text-center {
+       text-align: left !important;
+   }
+    .order-item .col-5.text-end {
+       padding-top: 0.5rem; /* Thêm chút padding cho giá tiền */
+   }
 }
 </style>

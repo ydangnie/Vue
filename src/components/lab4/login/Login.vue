@@ -4,12 +4,11 @@
       <h1 class="login-title">Đăng nhập</h1>
       <p class="login-subtitle">Chào mừng bạn quay trở lại</p>
 
-      <form @submit.prevent="dangNhap" class="login-form">
+      <form @submit.prevent="xuLyDangNhap" class="login-form">
         <div class="form-group mb-3">
           <label for="username" class="form-label">Tên đăng nhập</label>
           <input
-            v-model="username"
-            id="username"
+            v-model="tenDangNhap" id="username"
             type="text"
             class="form-control"
             placeholder="Nhập tên đăng nhập"
@@ -20,8 +19,7 @@
         <div class="form-group mb-4">
           <label for="password" class="form-label">Mật khẩu</label>
           <input
-            v-model="password"
-            id="password"
+            v-model="matKhau" id="password"
             type="password"
             class="form-control"
             placeholder="Nhập mật khẩu"
@@ -29,9 +27,8 @@
           />
         </div>
 
-        <button type="submit" class="btn btn-primary w-100 btn-lg" :disabled="loading">
-          <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-          {{ loading ? 'Đang xử lý...' : 'Đăng nhập' }}
+        <button type="submit" class="btn btn-primary w-100 btn-lg" :disabled="dangXuLy"> <span v-if="dangXuLy" class="spinner-border spinner-border-sm me-2"></span>
+          {{ dangXuLy ? 'Đang xử lý...' : 'Đăng nhập' }}
         </button>
       </form>
 
@@ -46,49 +43,73 @@
 </template>
 
 <script>
-// Phần <script> giữ nguyên không thay đổi
-import axios from '../../../../axios.js'
+// Import axios đã cấu hình
+import axios from '../../../../axios.js';
 
 export default {
-  name: 'Login',
+  name: 'Login', // Tên component
   data() {
     return {
-      username: '',
-      password: '',
-      loading: false
+      tenDangNhap: '', // Biến lưu tên đăng nhập nhập từ input
+      matKhau: '',     // Biến lưu mật khẩu nhập từ input
+      dangXuLy: false  // Biến cờ cho biết đang gửi yêu cầu đăng nhập hay không
     };
   },
   methods: {
-    async dangNhap() {
-      if (this.loading) return;
-      if (!this.username || !this.password) {
-        this.$toast.error('Vui lòng nhập đầy đủ thông tin!');
-        return;
-      }
-      this.loading = true;
-      try {
-        const response = await axios.get('/users');
-        const user = response.data.find(u => u.username === this.username && u.password === this.password);
+    // Hàm xử lý khi người dùng submit form đăng nhập
+    async xuLyDangNhap() {
+      // Nếu đang xử lý rồi thì không làm gì cả
+      if (this.dangXuLy) return;
 
-        if (user) {
-          this.$store.dispatch('setUser', user);
+      // --- KIỂM TRA DỮ LIỆU NHẬP ---
+      if (!this.tenDangNhap || !this.matKhau) {
+        this.$toast.error('Vui lòng nhập đầy đủ thông tin!');
+        return; // Dừng hàm nếu thiếu thông tin
+      }
+
+      // --- BẮT ĐẦU GỬI YÊU CẦU ĐĂNG NHẬP ---
+      this.dangXuLy = true; // Bật cờ đang xử lý
+
+      try {
+        // 1. Lấy danh sách tất cả người dùng từ API
+        const phanHoi = await axios.get('/users'); // Gửi yêu cầu GET
+        const danhSachNguoiDung = phanHoi.data;
+
+        // 2. Tìm người dùng trong danh sách có username VÀ password khớp với người dùng nhập
+        // Lưu ý: Đây là cách kiểm tra mật khẩu RẤT KHÔNG AN TOÀN, chỉ dùng cho mục đích demo/học tập.
+        // Trong thực tế, mật khẩu phải được mã hóa và kiểm tra ở phía server.
+        const nguoiDung = danhSachNguoiDung.find(u => u.username === this.tenDangNhap && u.password === this.matKhau);
+
+        // 3. Xử lý kết quả tìm kiếm
+        if (nguoiDung) {
+          // --- ĐĂNG NHẬP THÀNH CÔNG ---
+          // a. Lưu thông tin người dùng vào Vuex store (và localStorage thông qua mutation)
+          this.$store.dispatch('setUser', nguoiDung);
+
+          // b. Hiển thị thông báo thành công
           this.$toast.success('Đăng nhập thành công!');
-          
-          const redirectPath = localStorage.getItem('redirectPath');
-          if (redirectPath) {
-            localStorage.removeItem('redirectPath');
-            this.$router.push(redirectPath);
+
+          // c. Kiểm tra xem có cần chuyển hướng đến trang trước đó không
+          // (Ví dụ: người dùng vào trang cần đăng nhập, bị chuyển về login, sau khi login thành công sẽ quay lại trang đó)
+          const duongDanChuyenHuong = localStorage.getItem('redirectPath');
+          if (duongDanChuyenHuong) {
+            localStorage.removeItem('redirectPath'); // Xóa đường dẫn đã lưu
+            this.$router.push(duongDanChuyenHuong); // Chuyển đến trang trước đó
           } else {
-            this.$router.push('/');
+            this.$router.push('/'); // Nếu không có, chuyển về trang chủ
           }
 
         } else {
+          // --- ĐĂNG NHẬP THẤT BẠI ---
           this.$toast.error('Tên đăng nhập hoặc mật khẩu không đúng!');
         }
       } catch (error) {
-        this.$toast.error('Lỗi hệ thống!');
+        // --- LỖI KHI GỌI API ---
+        console.error("Lỗi đăng nhập:", error);
+        this.$toast.error('Lỗi hệ thống!', 'Không thể kết nối đến server.');
       } finally {
-        this.loading = false;
+        // --- LUÔN LUÔN THỰC HIỆN ---
+        this.dangXuLy = false; // Tắt cờ đang xử lý (cho phép nhấn nút lại)
       }
     },
   },
@@ -97,6 +118,7 @@ export default {
 
 
 <style scoped>
+/* Giữ nguyên CSS styles */
 .login-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #747578 0%, #000000 100%);
@@ -127,7 +149,7 @@ export default {
   }
 }
 
-.login-header {
+.login-header { /* Không được sử dụng trong template này */
   text-align: center;
   margin-bottom: 30px;
 }
@@ -140,13 +162,14 @@ export default {
   background: linear-gradient(135deg, #747578 0%, #000000 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
+  background-clip: text; /* Cần thuộc tính này cho trình duyệt khác */
 }
 
 .login-subtitle {
   color: #6c757d;
   font-size: 1rem;
   margin: 0;
+  margin-bottom: 1.5rem; /* Thêm khoảng cách dưới subtitle */
 }
 
 .login-form {
@@ -165,7 +188,7 @@ export default {
   font-size: 0.95rem;
 }
 
-.form-label i {
+.form-label i { /* Không được sử dụng trong template này */
   margin-right: 8px;
   color: #667eea;
   width: 16px;
@@ -188,7 +211,8 @@ export default {
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.btn-login {
+/* Đổi tên class nút cho nhất quán với style */
+.btn-primary { /* Sử dụng class Bootstrap thay vì .btn-login */
   width: 100%;
   padding: 14px;
   background: linear-gradient(135deg, #747578 0%, #000000 100%);
@@ -203,16 +227,16 @@ export default {
   letter-spacing: 0.5px;
 }
 
-.btn-login:hover:not(:disabled) {
-  background: linear-gradient(135deg, #747578 0%, #000000 100%);
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5a6a78 0%, #333333 100%); /* Làm tối màu khi hover */
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3); /* Giữ lại bóng đổ */
 }
 
-.btn-login:disabled {
+.btn-primary:disabled { /* Style cho nút bị vô hiệu hóa */
   opacity: 0.7;
   cursor: not-allowed;
-  transform: none;
+  transform: none; /* Bỏ hiệu ứng transform */
 }
 
 .login-footer {
@@ -229,10 +253,11 @@ export default {
 }
 
 .register-link:hover {
-  color: linear-gradient(135deg, #747578 0%, #000000 100%);
+  color: #5a6fd8; /* Sửa lại màu hover */
   text-decoration: underline;
 }
 
+/* Responsive */
 @media (max-width: 576px) {
   .login-container {
     padding: 10px;

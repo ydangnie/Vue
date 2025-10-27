@@ -1213,7 +1213,7 @@
       ],
       "total": 100,
       "paymentMethod": "cod",
-      "status": "pending",
+      "status": "delivered",
       "createdAt": "2025-10-21T02:02:28.650Z",
       "notes": "vgbg",
       "originalTotal": 100,
@@ -1303,9 +1303,215 @@
       ],
       "total": 49.5,
       "paymentMethod": "cod",
-      "status": "pending",
+      "status": "delivered",
       "createdAt": "2025-10-21T02:15:39.191Z",
       "notes": "fwef",
+      "originalTotal": 49.5,
+      "promoCode": null,
+      "promoDiscount": 0
+    },
+    {
+      "id": "1761385315166",
+      "customer": {
+        "name": "admin",
+        "email": "nieydpk04105@gmail.com",
+        "phone": "0987654",
+        "address": "bgfbfgbg"
+      },
+      "items": [
+        {
+          "id": "4",
+          "title": "Bluetooth Speaker",
+          "price": 39.99,
+          "category": "Electronics",
+          "images": [
+            "https://picsum.photos/seed/speaker/400/400",
+            "https://picsum.photos/seed/bluetooth/400/400"
+          ],
+          "description": "Portable, waterproof, deep bass. High-quality audio with waterproof design for outdoor use.",
+          "quantity": 1,
+          "discount": 0,
+          "featured": true,
+          "reviews": [
+            {
+              "author": "abc1234",
+              "rating": 3,
+              "comment": "đẹp",
+              "date": "2025-10-21T01:46:59.366Z"
+            }
+          ],
+          "stock": 15
+        }
+      ],
+      "total": 39.99,
+      "paymentMethod": "cod",
+      "status": "delivered",
+      "createdAt": "2025-10-25T09:41:55.166Z",
+      "notes": "gfbfgbfbf",
+      "originalTotal": 39.99,
+      "promoCode": null,
+      "promoDiscount": 0
+    },
+    {
+      "id": "1761556083841",
+      "customer": {
+        "name": "admin",
+        "email": "nieydpk04105@gmail.com",
+        "phone": "098766543",
+        "address": "hhfhfhthf"
+      },
+      "items": [
+        {
+          "id": "1759891048307",
+          "title": "Áo",
+          "price": 50,
+          "category": "Sports",
+          "description": "diksdnfjusndoufsd",
+          "quantity": 1,
+          "discount": 1,
+          "images": [
+            "https://picsum.photos/seed/placeholder/400/400"
+          ],
+          "featured": false,
+          "reviews": [
+            {
+              "author": "abc1234",
+              "rating": 4,
+              "comment": "đẹp",
+              "date": "2025-10-21T01:44:49.709Z"
+            },
+            {
+              "author": "admin",
+              "rating": 4,
+              "comment": "đẹp",
+              "date": "2025-10-21T01:55:33.533Z"
+            }
+          ],
+          "stock": 9
+        }
+      ],
+      "total": 49.5,
+      "paymentMethod": "cod",
+      "status": "pending",
+      "createdAt": "2025-10-27T09:08:03.841Z",
+      "notes": "hfthfthft",
+      "originalTotal": 49.5,
+      "promoCode": null,
+      "promoDiscount": 0
+    },
+    {
+      "id": "1761557460864",
+      "customer": {
+        "name": "admin",
+        "email": "nieydpk04105@gmail.com",
+        "phone": "09876543",
+        "address": "hfhghfhfgh"
+      },
+      "items": [
+        {
+          "id": "4",
+          "title": "Bluetooth Speaker",
+          "price": 39.99,
+          "category": "Electronics",
+          "images": [
+            "https://picsum.photos/seed/speaker/400/400",
+            "https://picsum.photos/seed/bluetooth/400/400"
+          ],
+          "description": "Portable, waterproof, deep bass. High-quality audio with waterproof design for outdoor use.",
+          "quantity": 1,
+          "discount": 0,
+          "featured": true,
+          "reviews": [
+            {
+              "author": "abc1234",
+              "rating": 3,
+              "comment": "đẹp",
+              "date": "2025-10-21T01:46:59.366Z"
+            }
+          ],
+          "stock": 15
+        },
+        {
+          "id": "1759891048307",
+          "title": "Áo",
+          "price": 50,
+          "category": "Sports",
+          "description": "diksdnfjusndoufsd",
+          "quantity": 1,
+          "discount": 1,
+          "images": [
+            "https://picsum.photos/seed/placeholder/400/400"
+          ],
+          "featured": false,
+          "reviews": [
+            {
+              "author": "abc1234",
+              "rating": 4,
+              "comment": "đẹp",
+              "date": "2025-10-21T01:44:49.709Z"
+            },
+            {
+              "author": "admin",
+              "rating": 4,
+              "comment": "đẹp",
+              "date": "2025-10-21T01:55:33.533Z"
+            }
+          ],
+          "stock": 9
+        }
+      ],
+      "total": 89.49000000000001,
+      "paymentMethod": "cod",
+      "status": "pending",
+      "createdAt": "2025-10-27T09:31:00.864Z",
+      "notes": "fghgfhfghf",
+      "originalTotal": 89.49000000000001,
+      "promoCode": null,
+      "promoDiscount": 0
+    },
+    {
+      "id": "1761557707467",
+      "customer": {
+        "name": "admin",
+        "email": "nieydpk04105@gmail.com",
+        "phone": "0987654321",
+        "address": "vfvfvfvf"
+      },
+      "items": [
+        {
+          "id": "1759891048307",
+          "title": "Áo",
+          "price": 50,
+          "category": "Sports",
+          "description": "diksdnfjusndoufsd",
+          "quantity": 1,
+          "discount": 1,
+          "images": [
+            "https://picsum.photos/seed/placeholder/400/400"
+          ],
+          "featured": false,
+          "reviews": [
+            {
+              "author": "abc1234",
+              "rating": 4,
+              "comment": "đẹp",
+              "date": "2025-10-21T01:44:49.709Z"
+            },
+            {
+              "author": "admin",
+              "rating": 4,
+              "comment": "đẹp",
+              "date": "2025-10-21T01:55:33.533Z"
+            }
+          ],
+          "stock": 9
+        }
+      ],
+      "total": 49.5,
+      "paymentMethod": "cod",
+      "status": "pending",
+      "createdAt": "2025-10-27T09:35:07.467Z",
+      "notes": "vfvfxvxfvxv",
       "originalTotal": 49.5,
       "promoCode": null,
       "promoDiscount": 0

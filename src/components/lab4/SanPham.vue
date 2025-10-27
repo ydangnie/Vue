@@ -154,10 +154,10 @@ export default {
         };
         // Gọi action addToCart từ Vuex store với số lượng là 1
         await this.addToCartAction({ product: productWithStock, quantity: 1 });
-        this.$toast.success('Thanh cong!', 'Da them san pham vao gio hang.'); // Thông báo thành công
+        this.$toast.success('Thành công!', 'Đã thêm sản phẩm vào giỏ hàng.'); // Thông báo thành công
       } catch (error) {
-        console.error('Loi khi them vao gio hang:', error);
-        this.$toast.error('Them that bai!', error.message || 'Co loi xay ra, vui long thu lai.'); // Thông báo lỗi
+        console.error('Lỗi khi thêm vào giỏ hàng:', error);
+        this.$toast.error('Thêm thất bại!', error.message || 'Có lỗi xảy ra, vui lòng thử lại.'); // Thông báo lỗi
       } finally {
         this.addingToCart[product.id] = false; // Reset trạng thái
       }

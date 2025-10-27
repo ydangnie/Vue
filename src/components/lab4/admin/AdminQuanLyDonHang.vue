@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-quan-ly-don-hang">
+  <div class="quan-ly-don-hang-admin">
     <div class="container">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="mb-0">
@@ -12,45 +12,45 @@
 
       <div class="row mb-4">
         <div class="col-md-3">
-          <div class="stat-card bg-primary text-white">
-            <div class="stat-icon">
+          <div class="the-thong-ke bg-primary text-white">
+            <div class="icon-thong-ke">
               <i class="fas fa-shopping-cart"></i>
             </div>
-            <div class="stat-content">
-              <h3>{{ orders.length }}</h3>
+            <div class="noi-dung-thong-ke">
+              <h3>{{ danhSachDonHang.length }}</h3>
               <p>Tổng đơn hàng</p>
             </div>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="stat-card bg-warning text-white">
-            <div class="stat-icon">
+          <div class="the-thong-ke bg-warning text-white">
+            <div class="icon-thong-ke">
               <i class="fas fa-clock"></i>
             </div>
-            <div class="stat-content">
-              <h3>{{ pendingOrders }}</h3>
+            <div class="noi-dung-thong-ke">
+              <h3>{{ soDonHangChoXuLy }}</h3>
               <p>Chờ xử lý</p>
             </div>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="stat-card bg-info text-white">
-            <div class="stat-icon">
+          <div class="the-thong-ke bg-info text-white">
+            <div class="icon-thong-ke">
               <i class="fas fa-truck"></i>
             </div>
-            <div class="stat-content">
-              <h3>{{ shippedOrders }}</h3>
+            <div class="noi-dung-thong-ke">
+              <h3>{{ soDonHangDaGiao }}</h3>
               <p>Đã giao</p>
             </div>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="stat-card bg-success text-white">
-            <div class="stat-icon">
+          <div class="the-thong-ke bg-success text-white">
+            <div class="icon-thong-ke">
               <i class="fas fa-check-circle"></i>
             </div>
-            <div class="stat-content">
-              <h3>{{ deliveredOrders }}</h3>
+            <div class="noi-dung-thong-ke">
+              <h3>{{ soDonHangHoanThanh }}</h3>
               <p>Hoàn thành</p>
             </div>
           </div>
@@ -61,10 +61,10 @@
         <div class="card-body">
           <div class="row">
             <div class="col-md-4">
-              <input v-model="searchQuery" type="text" class="form-control" placeholder="Tìm kiếm theo mã đơn hàng hoặc tên khách hàng...">
+              <input v-model="tuKhoaTimKiem" type="text" class="form-control" placeholder="Tìm kiếm theo mã đơn hàng hoặc tên khách hàng...">
             </div>
             <div class="col-md-3">
-              <select v-model="statusFilter" class="form-control">
+              <select v-model="trangThaiLoc" class="form-control">
                 <option value="">Tất cả trạng thái</option>
                 <option value="pending">Chờ xử lý</option>
                 <option value="processing">Đang xử lý</option>
@@ -74,7 +74,7 @@
               </select>
             </div>
             <div class="col-md-3">
-              <select v-model="sortBy" @change="sortOrders" class="form-control">
+              <select v-model="sapXepTheo" @change="sapXepDonHang" class="form-control">
                 <option value="date-desc">Mới nhất</option>
                 <option value="date-asc">Cũ nhất</option>
                 <option value="total-desc">Tổng tiền cao</option>
@@ -82,7 +82,7 @@
               </select>
             </div>
             <div class="col-md-2">
-              <button @click="resetFilters" class="btn btn-secondary w-100">
+              <button @click="datLaiBoLoc" class="btn btn-secondary w-100">
                 <i class="fas fa-undo"></i> Đặt lại
               </button>
             </div>
@@ -101,7 +101,7 @@
                 <tr>
                   <th>Mã đơn</th>
                   <th>Khách hàng</th>
-                  <th>Sản phẩm</th>
+                  <th>Sản phẩm (tóm tắt)</th>
                   <th>Tổng tiền</th>
                   <th>Thanh toán</th>
                   <th>Trạng thái</th>
@@ -110,56 +110,56 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="order in filteredOrders" :key="order.id">
+                <tr v-for="donHang in danhSachDonHangDaLoc" :key="donHang.id">
                   <td>
-                    <strong>#{{ order.id }}</strong>
+                    <strong>#{{ donHang.id }}</strong>
                   </td>
                   <td>
                     <div>
-                      <div class="fw-bold">{{ order.customer.name }}</div>
-                      <small class="text-muted">{{ order.customer.email }}</small>
+                      <div class="fw-bold">{{ donHang.customer.name }}</div>
+                      <small class="text-muted">{{ donHang.customer.email }}</small>
                     </div>
                   </td>
                   <td>
-                    <div v-for="item in order.items.slice(0, 2)" :key="item.id" class="mb-1">
+                    <div v-for="item in donHang.items.slice(0, 2)" :key="item.id" class="mb-1">
                       <small>{{ item.title }} (x{{ item.quantity }})</small>
                     </div>
-                    <small v-if="order.items.length > 2" class="text-muted">
-                      và {{ order.items.length - 2 }} sản phẩm khác...
+                    <small v-if="donHang.items.length > 2" class="text-muted">
+                      và {{ donHang.items.length - 2 }} sản phẩm khác...
                     </small>
                   </td>
                   <td>
-                    <span class="fw-bold text-primary">${{ order.total.toFixed(2) }}</span>
+                    <span class="fw-bold text-primary">${{ donHang.total.toFixed(2) }}</span>
                   </td>
                   <td>
-                    <span :class="getPaymentBadgeClass(order.paymentMethod)">
-                      {{ getPaymentText(order.paymentMethod) }}
+                    <span :class="layClassBadgeThanhToan(donHang.paymentMethod)">
+                      {{ layChuThanhToan(donHang.paymentMethod) }}
                     </span>
                   </td>
                   <td>
-                    <span :class="getStatusBadgeClass(order.status)">
-                      {{ getStatusText(order.status) }}
+                    <span :class="layClassBadgeTrangThai(donHang.status)">
+                      {{ layChuTrangThai(donHang.status) }}
                     </span>
                   </td>
-                  <td>{{ formatDate(order.createdAt) }}</td>
+                  <td>{{ dinhDangNgay(donHang.createdAt) }}</td>
                   <td>
                     <div class="btn-group" role="group">
-                      <button @click="viewOrder(order)" class="btn btn-sm btn-outline-info" title="Xem chi tiết">
+                      <button @click="xemDonHang(donHang)" class="btn btn-sm btn-outline-info" title="Xem chi tiết">
                         <i class="fas fa-eye"></i>
                       </button>
-                      <button @click="updateOrderStatus(order, 'processing')" v-if="order.status === 'pending'"
+                      <button @click="capNhatTrangThaiDonHang(donHang, 'processing')" v-if="donHang.status === 'pending'"
                               class="btn btn-sm btn-outline-primary" title="Bắt đầu xử lý">
                         <i class="fas fa-play"></i>
                       </button>
-                      <button @click="updateOrderStatus(order, 'shipped')" v-if="order.status === 'processing'"
+                      <button @click="capNhatTrangThaiDonHang(donHang, 'shipped')" v-if="donHang.status === 'processing'"
                               class="btn btn-sm btn-outline-warning" title="Đã giao">
                         <i class="fas fa-truck"></i>
                       </button>
-                      <button @click="updateOrderStatus(order, 'delivered')" v-if="order.status === 'shipped'"
+                      <button @click="capNhatTrangThaiDonHang(donHang, 'delivered')" v-if="donHang.status === 'shipped'"
                               class="btn btn-sm btn-outline-success" title="Hoàn thành">
                         <i class="fas fa-check"></i>
                       </button>
-                      <button @click="updateOrderStatus(order, 'cancelled')" v-if="order.status !== 'delivered' && order.status !== 'cancelled'"
+                      <button @click="capNhatTrangThaiDonHang(donHang, 'cancelled')" v-if="donHang.status !== 'delivered' && donHang.status !== 'cancelled'"
                               class="btn btn-sm btn-outline-danger" title="Hủy đơn">
                         <i class="fas fa-times"></i>
                       </button>
@@ -170,47 +170,47 @@
             </table>
           </div>
 
-          <div v-if="filteredOrders.length === 0" class="text-center py-5">
+          <div v-if="danhSachDonHangDaLoc.length === 0" class="text-center py-5">
             <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
             <h4>Không tìm thấy đơn hàng nào</h4>
-            <p class="text-muted">Hãy thử tìm kiếm với từ khóa khác</p>
+            <p class="text-muted">Hãy thử tìm kiếm hoặc lọc với tiêu chí khác</p>
           </div>
         </div>
       </div>
 
-      <div v-if="showOrderModal" class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);">
+      <div v-if="hienThiModalChiTiet" class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Chi tiết đơn hàng #{{ selectedOrder?.id }}</h5>
-              <button @click="closeOrderModal" class="btn-close"></button>
+              <h5 class="modal-title">Chi tiết đơn hàng #{{ donHangDuocChon?.id }}</h5>
+              <button @click="dongModalChiTiet" class="btn-close"></button>
             </div>
-            <div class="modal-body" v-if="selectedOrder">
+            <div class="modal-body" v-if="donHangDuocChon">
               <div class="row">
                 <div class="col-md-6">
                   <h6>Thông tin khách hàng</h6>
-                  <p><strong>Họ tên:</strong> {{ selectedOrder.customer.name }}</p>
-                  <p><strong>Email:</strong> {{ selectedOrder.customer.email }}</p>
-                  <p><strong>Số điện thoại:</strong> {{ selectedOrder.customer.phone }}</p>
-                  <p><strong>Địa chỉ:</strong> {{ selectedOrder.customer.address }}</p>
-                  <p v-if="selectedOrder.notes"><strong>Ghi chú:</strong> {{ selectedOrder.notes }}</p>
+                  <p><strong>Họ tên:</strong> {{ donHangDuocChon.customer.name }}</p>
+                  <p><strong>Email:</strong> {{ donHangDuocChon.customer.email }}</p>
+                  <p><strong>Số điện thoại:</strong> {{ donHangDuocChon.customer.phone }}</p>
+                  <p><strong>Địa chỉ:</strong> {{ donHangDuocChon.customer.address }}</p>
+                  <p v-if="donHangDuocChon.notes"><strong>Ghi chú:</strong> {{ donHangDuocChon.notes }}</p>
                 </div>
                 <div class="col-md-6">
                   <h6>Thông tin đơn hàng</h6>
-                  <p><strong>Mã đơn hàng:</strong> #{{ selectedOrder.id }}</p>
-                  <p><strong>Ngày đặt:</strong> {{ formatDate(selectedOrder.createdAt) }}</p>
+                  <p><strong>Mã đơn hàng:</strong> #{{ donHangDuocChon.id }}</p>
+                  <p><strong>Ngày đặt:</strong> {{ dinhDangNgay(donHangDuocChon.createdAt) }}</p>
                   <p><strong>Trạng thái:</strong>
-                    <span :class="getStatusBadgeClass(selectedOrder.status)">
-                      {{ getStatusText(selectedOrder.status) }}
+                    <span :class="layClassBadgeTrangThai(donHangDuocChon.status)">
+                      {{ layChuTrangThai(donHangDuocChon.status) }}
                     </span>
                   </p>
-                  <p><strong>Thanh toán:</strong> {{ getPaymentText(selectedOrder.paymentMethod) }}</p>
-                  <p><strong>Tổng tiền:</strong> <span class="text-danger fw-bold">${{ selectedOrder.total.toFixed(2) }}</span></p>
+                  <p><strong>Thanh toán:</strong> {{ layChuThanhToan(donHangDuocChon.paymentMethod) }}</p>
+                  <p><strong>Tổng tiền:</strong> <span class="text-danger fw-bold">${{ donHangDuocChon.total.toFixed(2) }}</span></p>
                 </div>
               </div>
               <hr>
               <h6>Sản phẩm đã đặt</h6>
-              <div v-for="item in selectedOrder.items" :key="item.id" class="order-item mb-2 p-2 border rounded">
+              <div v-for="item in donHangDuocChon.items" :key="item.id" class="item-don-hang mb-2 p-2 border rounded">
                 <div class="row align-items-center">
                   <div class="col-md-2">
                     <img :src="item.images && item.images.length > 0 ? item.images[0] : 'https://via.placeholder.com/60x60?text=No+Image'"
@@ -230,7 +230,7 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button @click="closeOrderModal" class="btn btn-secondary">Đóng</button>
+              <button @click="dongModalChiTiet" class="btn btn-secondary">Đóng</button>
             </div>
           </div>
         </div>
@@ -240,121 +240,144 @@
 </template>
 
 <script>
-import axios from '../../../../axios.js';
+import axios from '../../../../axios.js'; // Import cấu hình axios
 
 export default {
-  name: 'AdminQuanLyDonHang',
+  name: 'AdminQuanLyDonHang', // Tên component
   data() {
     return {
-      orders: [],
-      filteredOrders: [],
-      searchQuery: '',
-      statusFilter: '',
-      sortBy: 'date-desc',
-      showOrderModal: false,
-      selectedOrder: null
+      danhSachDonHang: [], // Mảng chứa toàn bộ đơn hàng từ API
+      danhSachDonHangDaLoc: [], // Mảng chứa đơn hàng sau khi lọc và sắp xếp
+      tuKhoaTimKiem: '', // Từ khóa tìm kiếm (liên kết với input)
+      trangThaiLoc: '', // Trạng thái được chọn để lọc (liên kết với select)
+      sapXepTheo: 'date-desc', // Tiêu chí sắp xếp (liên kết với select)
+      hienThiModalChiTiet: false, // Biến cờ điều khiển modal chi tiết
+      donHangDuocChon: null // Lưu đơn hàng đang được xem chi tiết
     };
   },
+  // Các thuộc tính tính toán (computed properties)
   computed: {
-    pendingOrders() {
-      return this.orders.filter(order => order.status === 'pending').length;
+    // Đếm số đơn hàng chờ xử lý
+    soDonHangChoXuLy() {
+      return this.danhSachDonHang.filter(donHang => donHang.status === 'pending').length;
     },
-    shippedOrders() {
-      return this.orders.filter(order => order.status === 'shipped').length;
+    // Đếm số đơn hàng đã giao
+    soDonHangDaGiao() {
+      return this.danhSachDonHang.filter(donHang => donHang.status === 'shipped').length;
     },
-    deliveredOrders() {
-      return this.orders.filter(order => order.status === 'delivered').length;
+    // Đếm số đơn hàng đã hoàn thành
+    soDonHangHoanThanh() {
+      return this.danhSachDonHang.filter(donHang => donHang.status === 'delivered').length;
     }
   },
+  // Hàm chạy sau khi component được tạo và gắn vào DOM
   mounted() {
-    this.loadOrders();
+    this.taiDanhSachDonHang(); // Tải danh sách đơn hàng ban đầu
   },
+  // Theo dõi sự thay đổi của các biến data
   watch: {
-    searchQuery() {
-      this.filterOrders();
+    // Khi từ khóa tìm kiếm thay đổi, lọc lại danh sách
+    tuKhoaTimKiem() {
+      this.locDonHang();
     },
-    statusFilter() {
-      this.filterOrders();
+    // Khi trạng thái lọc thay đổi, lọc lại danh sách
+    trangThaiLoc() {
+      this.locDonHang();
     }
+    // Không cần watch `sapXepTheo` vì đã có @change trên select
   },
   methods: {
-    loadOrders() {
+    // Hàm tải danh sách đơn hàng từ API
+    taiDanhSachDonHang() {
       axios.get('/orders')
         .then(response => {
-          this.orders = response.data;
-          this.filteredOrders = [...this.orders];
-          this.sortOrders();
+          this.danhSachDonHang = response.data; // Lưu danh sách gốc
+          this.danhSachDonHangDaLoc = [...this.danhSachDonHang]; // Sao chép để hiển thị và lọc
+          this.sapXepDonHang(); // Sắp xếp danh sách ban đầu
         })
         .catch(error => {
-          console.error('Error loading orders:', error);
-          this.$router.push('/login');
+          console.error('Lỗi khi tải danh sách đơn hàng:', error);
+          this.$toast.error('Không thể tải danh sách đơn hàng!'); // Thông báo lỗi
+          // Có thể chuyển hướng về trang login nếu lỗi xác thực
+          // this.$router.push('/login');
         });
     },
-    filterOrders() {
-      let filtered = [...this.orders];
+    // Hàm lọc danh sách đơn hàng dựa trên từ khóa và trạng thái
+    locDonHang() {
+      let danhSachTam = [...this.danhSachDonHang]; // Bắt đầu với danh sách gốc
 
-      if (this.searchQuery) {
-        filtered = filtered.filter(order =>
-          order.id.toString().includes(this.searchQuery.toLowerCase()) ||
-          order.customer.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          order.customer.email.toLowerCase().includes(this.searchQuery.toLowerCase())
+      // Lọc theo từ khóa tìm kiếm (không phân biệt hoa thường)
+      if (this.tuKhoaTimKiem) {
+        const tuKhoa = this.tuKhoaTimKiem.toLowerCase();
+        danhSachTam = danhSachTam.filter(donHang =>
+          donHang.id.toString().toLowerCase().includes(tuKhoa) || // Tìm theo ID
+          donHang.customer.name.toLowerCase().includes(tuKhoa) || // Tìm theo tên khách hàng
+          donHang.customer.email.toLowerCase().includes(tuKhoa) // Tìm theo email khách hàng
         );
       }
 
-      if (this.statusFilter) {
-        filtered = filtered.filter(order => order.status === this.statusFilter);
+      // Lọc theo trạng thái đã chọn
+      if (this.trangThaiLoc) {
+        danhSachTam = danhSachTam.filter(donHang => donHang.status === this.trangThaiLoc);
       }
 
-      this.filteredOrders = filtered;
-      this.sortOrders();
+      this.danhSachDonHangDaLoc = danhSachTam; // Cập nhật danh sách hiển thị
+      this.sapXepDonHang(); // Sắp xếp lại sau khi lọc
     },
-    sortOrders() {
-      this.filteredOrders.sort((a, b) => {
-        switch (this.sortBy) {
-          case 'date-asc':
+    // Hàm sắp xếp danh sách đơn hàng đã lọc
+    sapXepDonHang() {
+      this.danhSachDonHangDaLoc.sort((a, b) => {
+        switch (this.sapXepTheo) {
+          case 'date-asc': // Cũ nhất trước
             return new Date(a.createdAt) - new Date(b.createdAt);
-          case 'date-desc':
+          case 'date-desc': // Mới nhất trước (mặc định)
             return new Date(b.createdAt) - new Date(a.createdAt);
-          case 'total-asc':
+          case 'total-asc': // Tổng tiền thấp trước
             return a.total - b.total;
-          case 'total-desc':
+          case 'total-desc': // Tổng tiền cao trước
             return b.total - a.total;
-          default:
+          default: // Mặc định là mới nhất trước
             return new Date(b.createdAt) - new Date(a.createdAt);
         }
       });
     },
-    resetFilters() {
-      this.searchQuery = '';
-      this.statusFilter = '';
-      this.sortBy = 'date-desc';
-      this.filteredOrders = [...this.orders];
-      this.sortOrders();
+    // Hàm đặt lại các bộ lọc về giá trị mặc định
+    datLaiBoLoc() {
+      this.tuKhoaTimKiem = '';
+      this.trangThaiLoc = '';
+      this.sapXepTheo = 'date-desc'; // Đặt lại sắp xếp mặc định
+      this.danhSachDonHangDaLoc = [...this.danhSachDonHang]; // Hiển thị lại danh sách gốc
+      this.sapXepDonHang(); // Sắp xếp lại
     },
-    viewOrder(order) {
-      this.selectedOrder = order;
-      this.showOrderModal = true;
+    // Hàm hiển thị modal chi tiết đơn hàng
+    xemDonHang(donHang) {
+      this.donHangDuocChon = donHang; // Lưu đơn hàng được chọn
+      this.hienThiModalChiTiet = true; // Mở modal
     },
-    closeOrderModal() {
-      this.showOrderModal = false;
-      this.selectedOrder = null;
+    // Hàm đóng modal chi tiết đơn hàng
+    dongModalChiTiet() {
+      this.hienThiModalChiTiet = false; // Đóng modal
+      this.donHangDuocChon = null; // Xóa đơn hàng đang chọn
     },
-    updateOrderStatus(order, newStatus) {
-      const statusText = this.getStatusText(newStatus);
-      if (confirm(`Bạn có chắc muốn cập nhật trạng thái đơn hàng #${order.id} thành "${statusText}"?`)) {
-        // SỬA Ở ĐÂY: Dùng PATCH và chỉ gửi status
-        axios.patch(`/orders/${order.id}`, { status: newStatus })
+    // Hàm cập nhật trạng thái đơn hàng
+    capNhatTrangThaiDonHang(donHang, trangThaiMoi) {
+      const chuTrangThai = this.layChuTrangThai(trangThaiMoi); // Lấy tên trạng thái tiếng Việt
+      // Xác nhận trước khi cập nhật
+      if (confirm(`Bạn có chắc muốn cập nhật trạng thái đơn hàng #${donHang.id} thành "${chuTrangThai}"?`)) {
+        // Gửi yêu cầu PATCH đến API chỉ với trường status cần cập nhật
+        axios.patch(`/orders/${donHang.id}`, { status: trangThaiMoi })
           .then(() => {
-            this.loadOrders();
-            this.$toast.success(`Đã cập nhật trạng thái đơn hàng thành "${statusText}"`);
+            this.taiDanhSachDonHang(); // Tải lại danh sách để cập nhật giao diện
+            this.$toast.success(`Đã cập nhật trạng thái đơn hàng thành "${chuTrangThai}"`); // Thông báo thành công
           })
           .catch(error => {
-            console.error('Error updating order status:', error);
-            this.$toast.error('Có lỗi xảy ra khi cập nhật trạng thái đơn hàng');
+            console.error('Lỗi khi cập nhật trạng thái:', error);
+            this.$toast.error('Có lỗi xảy ra khi cập nhật trạng thái đơn hàng'); // Thông báo lỗi
           });
       }
     },
-    getStatusBadgeClass(status) {
+    // Hàm lấy class CSS cho badge trạng thái
+    layClassBadgeTrangThai(trangThai) {
       const classes = {
         'pending': 'badge bg-warning',
         'processing': 'badge bg-info',
@@ -362,9 +385,10 @@ export default {
         'delivered': 'badge bg-success',
         'cancelled': 'badge bg-danger'
       };
-      return classes[status] || 'badge bg-secondary';
+      return classes[trangThai] || 'badge bg-secondary'; // Trả về class mặc định nếu không khớp
     },
-    getStatusText(status) {
+    // Hàm lấy tên trạng thái tiếng Việt
+    layChuTrangThai(trangThai) {
       const statusMap = {
         'pending': 'Chờ xử lý',
         'processing': 'Đang xử lý',
@@ -372,31 +396,40 @@ export default {
         'delivered': 'Đã nhận',
         'cancelled': 'Đã hủy'
       };
-      return statusMap[status] || status;
+      return statusMap[trangThai] || trangThai; // Trả về tên gốc nếu không có trong map
     },
-    getPaymentBadgeClass(method) {
+    // Hàm lấy class CSS cho badge thanh toán
+    layClassBadgeThanhToan(phuongThuc) {
       const classes = {
         'cod': 'badge bg-success',
         'bank': 'badge bg-info',
-        'card': 'badge bg-primary'
+        'card': 'badge bg-primary',
+        'vnpay': 'badge bg-warning text-dark' // Thêm VNPay nếu có
       };
-      return classes[method] || 'badge bg-secondary';
+      return classes[phuongThuc] || 'badge bg-secondary';
     },
-    getPaymentText(method) {
+    // Hàm lấy tên phương thức thanh toán tiếng Việt
+    layChuThanhToan(phuongThuc) {
       const paymentMap = {
         'cod': 'COD',
         'bank': 'Chuyển khoản',
-        'card': 'Thẻ tín dụng'
+        'card': 'Thẻ tín dụng',
+        'vnpay': 'VNPay' // Thêm VNPay nếu có
       };
-      return paymentMap[method] || method;
+      return paymentMap[phuongThuc] || phuongThuc;
     },
-    formatDate(dateString) {
-      return new Date(dateString).toLocaleDateString('vi-VN', {
+    // Hàm định dạng ngày tháng
+    dinhDangNgay(chuoiNgay) {
+      // Chuyển đổi chuỗi ISO thành đối tượng Date
+      const date = new Date(chuoiNgay);
+      // Định dạng theo kiểu Việt Nam (ngày/tháng/năm giờ:phút)
+      return date.toLocaleString('vi-VN', {
         year: 'numeric',
-        month: 'short',
+        month: 'short', // 'short' cho tháng dạng chữ ngắn (Thg 10)
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
+        // timeZone: 'Asia/Ho_Chi_Minh' // Đảm bảo đúng múi giờ nếu cần
       });
     }
   }
@@ -404,7 +437,8 @@ export default {
 </script>
 
 <style scoped>
-.stat-card {
+/* Giữ nguyên các style CSS */
+.the-thong-ke { /* Đổi tên class cho nhất quán */
   border-radius: 10px;
   padding: 20px;
   display: flex;
@@ -412,60 +446,60 @@ export default {
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-.stat-icon {
+.icon-thong-ke { /* Đổi tên class */
   font-size: 2rem;
   margin-right: 15px;
   opacity: 0.8;
 }
 
-.stat-content h3 {
+.noi-dung-thong-ke h3 { /* Đổi tên class */
   margin: 0;
   font-size: 2rem;
   font-weight: bold;
 }
 
-.stat-content p {
+.noi-dung-thong-ke p { /* Đổi tên class */
   margin: 0;
   opacity: 0.8;
 }
 
 .table th {
-  border-top: none;
-  font-weight: 600;
+  border-top: none; /* Bỏ đường viền trên cùng của header bảng */
+  font-weight: 600; /* Chữ đậm hơn */
 }
 
 .btn-group .btn {
-  margin-right: 5px;
+  margin-right: 5px; /* Khoảng cách giữa các nút trong nhóm */
 }
 
 .btn-group .btn:last-child {
-  margin-right: 0;
+  margin-right: 0; /* Nút cuối cùng không cần cách phải */
 }
 
 .modal {
-  z-index: 1050;
+  z-index: 1050; /* Đảm bảo modal nằm trên các phần tử khác */
 }
 
 .card {
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+  border: none; /* Bỏ đường viền mặc định của card */
+  border-radius: 10px; /* Bo góc card */
+  box-shadow: 0 2px 15px rgba(0,0,0,0.1); /* Đổ bóng nhẹ */
 }
 
 .card-header {
-  background: linear-gradient(135deg, #747578 0%, #000000 100%);
-  color: white;
-  border-radius: 10px 10px 0 0 !important;
-  border-bottom: none;
+  background: linear-gradient(135deg, #747578 0%, #000000 100%); /* Nền gradient cho header */
+  color: white; /* Chữ trắng */
+  border-radius: 10px 10px 0 0 !important; /* Bo góc trên của header */
+  border-bottom: none; /* Bỏ đường viền dưới của header */
 }
 
-.order-item {
-  background: #f8f9fa;
+.item-don-hang { /* Đổi tên class */
+  background: #f8f9fa; /* Nền xám nhạt cho item trong modal */
 }
 
-.order-item img {
+.item-don-hang img { /* Đổi tên class */
   max-width: 60px;
   height: 60px;
-  object-fit: cover;
+  object-fit: cover; /* Giữ tỷ lệ ảnh */
 }
 </style>

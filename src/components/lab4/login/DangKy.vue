@@ -6,13 +6,15 @@
         <p class="register-subtitle">Tạo tài khoản để bắt đầu mua sắm</p>
       </div>
 
-      <form @submit.prevent="dangKy" class="register-form">
+      <!-- Form đăng ký, gọi hàm xuLyDangKy khi submit -->
+      <form @submit.prevent="xuLyDangKy" class="register-form">
+        <!-- Nhóm Tên đăng nhập -->
         <div class="form-group">
           <label for="username" class="form-label">
             <i class="fas fa-user"></i> Tên đăng nhập
           </label>
           <input
-            v-model="duLieuForm.username"
+            v-model="formDangKy.tenDangNhap" <!-- Liên kết với tenDangNhap -->
             id="username"
             type="text"
             class="form-control"
@@ -21,12 +23,13 @@
           />
         </div>
 
+        <!-- Nhóm Email -->
         <div class="form-group">
           <label for="email" class="form-label">
             <i class="fas fa-envelope"></i> Email
           </label>
           <input
-            v-model="duLieuForm.email"
+            v-model="formDangKy.email" <!-- Liên kết với email -->
             id="email"
             type="email"
             class="form-control"
@@ -35,12 +38,13 @@
           />
         </div>
 
+        <!-- Nhóm Mật khẩu -->
         <div class="form-group">
           <label for="password" class="form-label">
             <i class="fas fa-lock"></i> Mật khẩu
           </label>
           <input
-            v-model="duLieuForm.password"
+            v-model="formDangKy.matKhau" <!-- Liên kết với matKhau -->
             id="password"
             type="password"
             class="form-control"
@@ -49,12 +53,13 @@
           />
         </div>
 
+        <!-- Nhóm Xác nhận mật khẩu -->
         <div class="form-group">
           <label for="confirmPassword" class="form-label">
             <i class="fas fa-lock"></i> Xác nhận mật khẩu
           </label>
           <input
-            v-model="confirmPassword"
+            v-model="xacNhanMatKhau" <!-- Liên kết với xacNhanMatKhau -->
             id="confirmPassword"
             type="password"
             class="form-control"
@@ -63,13 +68,17 @@
           />
         </div>
 
-        <button type="submit" class="btn-register" :disabled="loading">
-          <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+        <!-- Nút Đăng ký -->
+        <button type="submit" class="btn-register" :disabled="dangXuLy"> <!-- :disabled vô hiệu hóa nút khi dangXuLy=true -->
+          <!-- Hiển thị spinner khi đang xử lý -->
+          <span v-if="dangXuLy" class="spinner-border spinner-border-sm me-2" role="status"></span>
           <i class="fas fa-user-plus me-2"></i>
-          {{ loading ? 'Đang đăng ký...' : 'Đăng ký' }}
+          <!-- Thay đổi text nút tùy theo trạng thái dangXuLy -->
+          {{ dangXuLy ? 'Đang đăng ký...' : 'Đăng ký' }}
         </button>
       </form>
 
+      <!-- Link đến trang Đăng nhập -->
       <div class="register-footer">
         <p class="mb-0">
           Đã có tài khoản?
@@ -81,77 +90,106 @@
 </template>
 
 <script>
-import axios from '../../../../axios.js'
+// Import axios đã cấu hình
+import axios from '../../../../axios.js';
 
 export default {
-  name: 'DangKy',
+  name: 'DangKy', // Tên component
   data() {
     return {
-      duLieuForm: {
-        username: '',
+      // Đối tượng lưu trữ dữ liệu nhập từ form
+      formDangKy: {
+        tenDangNhap: '',
         email: '',
-        password: '',
-        role: 'user' // Mặc định tất cả tài khoản mới là 'user'
+        matKhau: '',
+        vaiTro: 'user' // Mặc định vai trò là 'user'
       },
-      confirmPassword: '',
-      loading: false
+      // Biến lưu trữ mật khẩu xác nhận
+      xacNhanMatKhau: '',
+      // Biến cờ để biết có đang gửi yêu cầu đăng ký hay không (dùng để vô hiệu hóa nút)
+      dangXuLy: false
     };
   },
   methods: {
-    async dangKy() {
-      if (this.loading) return;
+    // Hàm xử lý khi người dùng submit form đăng ký
+    async xuLyDangKy() {
+      // Nếu đang xử lý rồi thì không làm gì cả (tránh nhấn nút nhiều lần)
+      if (this.dangXuLy) return;
 
-      if (!this.duLieuForm.username || !this.duLieuForm.email || !this.duLieuForm.password) {
+      // --- KIỂM TRA DỮ LIỆU NHẬP (VALIDATION) ---
+      // Kiểm tra xem có trường nào bị bỏ trống không
+      if (!this.formDangKy.tenDangNhap || !this.formDangKy.email || !this.formDangKy.matKhau || !this.xacNhanMatKhau) {
         this.$toast.error('Vui lòng điền đầy đủ thông tin!');
-        return;
+        return; // Dừng hàm
       }
-      if (this.duLieuForm.password !== this.confirmPassword) {
+      // Kiểm tra mật khẩu xác nhận có khớp không
+      if (this.formDangKy.matKhau !== this.xacNhanMatKhau) {
         this.$toast.error('Mật khẩu xác nhận không khớp!');
-        return;
+        return; // Dừng hàm
       }
-      if (this.duLieuForm.password.length < 6) {
+      // Kiểm tra độ dài mật khẩu
+      if (this.formDangKy.matKhau.length < 6) {
         this.$toast.error('Mật khẩu phải có ít nhất 6 ký tự!');
-        return;
+        return; // Dừng hàm
       }
 
-      this.loading = true;
+      // --- BẮT ĐẦU GỬI YÊU CẦU ĐĂNG KÝ ---
+      this.dangXuLy = true; // Đặt cờ đang xử lý thành true (để hiển thị spinner và vô hiệu hóa nút)
+
       try {
-        const response = await axios.get('/users');
-        const danhSachNguoiDung = response.data;
+        // 1. Lấy danh sách người dùng hiện có để kiểm tra trùng lặp
+        const phanHoi = await axios.get('/users'); // Gửi yêu cầu GET đến API
+        const danhSachNguoiDung = phanHoi.data; // Lấy dữ liệu từ phản hồi
 
-        if (danhSachNguoiDung.some(user => user.username === this.duLieuForm.username)) {
+        // 2. Kiểm tra tên đăng nhập đã tồn tại chưa
+        // .some() trả về true nếu có ít nhất 1 phần tử thỏa mãn điều kiện
+        if (danhSachNguoiDung.some(user => user.username === this.formDangKy.tenDangNhap)) {
           this.$toast.warning('Tên đăng nhập đã tồn tại!');
-          this.loading = false;
-          return;
+          this.dangXuLy = false; // Đặt lại cờ
+          return; // Dừng hàm
         }
-        if (danhSachNguoiDung.some(user => user.email === this.duLieuForm.email)) {
+        // 3. Kiểm tra email đã tồn tại chưa
+        if (danhSachNguoiDung.some(user => user.email === this.formDangKy.email)) {
           this.$toast.warning('Email đã được sử dụng!');
-          this.loading = false;
-          return;
+          this.dangXuLy = false; // Đặt lại cờ
+          return; // Dừng hàm
         }
 
-        const moiNguoiDung = {
-          id: Date.now(),
-          ...this.duLieuForm,
+        // 4. Tạo đối tượng người dùng mới
+        const nguoiDungMoi = {
+          id: Date.now().toString(), // Tạo ID duy nhất bằng timestamp (chuyển sang chuỗi)
+          username: this.formDangKy.tenDangNhap, // Lấy từ form
+          email: this.formDangKy.email, // Lấy từ form
+          password: this.formDangKy.matKhau, // Lấy từ form (Lưu ý: nên mã hóa mật khẩu ở đây!)
+          role: this.formDangKy.vaiTro, // Lấy vai trò mặc định
+          // Thêm các trường thông tin cá nhân mặc định khác (nếu có trong db.json)
           age: null,
           gender: '',
           desiredProducts: ''
         };
 
-        await axios.post('/users', moiNguoiDung);
+        // 5. Gửi yêu cầu POST để tạo người dùng mới
+        await axios.post('/users', nguoiDungMoi);
+
+        // 6. Thông báo thành công và chuyển hướng đến trang đăng nhập
         this.$toast.success('Đăng ký thành công!');
-        this.$router.push('/login');
+        this.$router.push('/login'); // Chuyển trang
 
       } catch (error) {
-        this.$toast.error('Đăng ký thất bại!');
+        // Nếu có lỗi trong quá trình gọi API
+        console.error("Lỗi đăng ký:", error); // Ghi lỗi ra console để debug
+        this.$toast.error('Đăng ký thất bại!', 'Có lỗi xảy ra, vui lòng thử lại.'); // Thông báo lỗi
       } finally {
-        this.loading = false;
+        // Khối finally luôn chạy dù thành công hay thất bại
+        this.dangXuLy = false; // Đặt lại cờ đang xử lý
       }
     },
   },
 };
 </script>
+
 <style scoped>
+/* Giữ nguyên CSS styles */
 .register-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #747578 0%, #000000 100%);
@@ -265,7 +303,7 @@ export default {
 .btn-register:hover:not(:disabled) {
   background: linear-gradient(135deg, #747578 0%, #000000 100%);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3); /* Giữ lại bóng đổ */
 }
 
 .btn-register:disabled {
@@ -292,6 +330,7 @@ export default {
   text-decoration: underline;
 }
 
+/* Responsive cho màn hình nhỏ */
 @media (max-width: 576px) {
   .register-container {
     padding: 10px;
